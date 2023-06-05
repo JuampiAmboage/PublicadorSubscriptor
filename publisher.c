@@ -11,6 +11,7 @@
 #include <pthread.h>
 
 #include "proxy/proxy.h"
+#include "./process/process.h"
 
 
 #include <getopt.h> //para getopt_long
@@ -23,6 +24,9 @@ int main(int argc, char *argv[]) {
     int opt= 0;
     int port;
     char *ip,*topic;
+
+    // create process
+    // Process publisherProcess = initializeProcess();
 
     static struct option long_options[] = {
             {"ip",      required_argument,       0,  'a' },

@@ -11,6 +11,7 @@
 #include <pthread.h>
 
 #include "proxy/proxy.h"
+#include "./process/process.h"
 
 
 #include <getopt.h> //para getopt_long
@@ -25,6 +26,9 @@ int main(int argc, char *argv[]) {
     int opt= 0;
     int port;
     char *mode;
+
+    // create process
+    // Process brokerProcess = initializeProcess();
 
     static struct option long_options[] = {
             {"port",      required_argument,       0,  'a' },
@@ -62,9 +66,5 @@ int main(int argc, char *argv[]) {
     while(1){
         client_accept(mode);
     }
-
-
-
-
     return 0;
 }

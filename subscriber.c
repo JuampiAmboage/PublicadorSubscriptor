@@ -1,8 +1,9 @@
 #include <errno.h>
 #include <pthread.h>
-#include "proxy/proxy.h"
-
 #include <getopt.h> //para getopt_long
+
+#include "proxy/proxy.h"
+#include "./process/process.h"
 
 struct sockaddr_in getDetail(int client_or_server);
 
@@ -12,6 +13,9 @@ int main(int argc, char *argv[]) {
     int opt= 0;
     int port;
     char *ip,*topic;
+
+    // create process
+    // Process subscriberProcess = initializeProcess();
 
     static struct option long_options[] = {
             {"ip",      required_argument,       0,  'a' },
