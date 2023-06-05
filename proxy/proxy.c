@@ -1,10 +1,12 @@
 #include <stdlib.h>
 #include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
+//#include <sys/socket.h>
+//#include <netinet/in.h>
 #include <unistd.h>
 #include <signal.h>
-#include <arpa/inet.h>
+//#include <arpa/inet.h>
+#include <Winsock2.h>
+
 #include <errno.h>
 #include <pthread.h>
 #include <stdio.h>
@@ -56,9 +58,6 @@ void set_port (unsigned int port){
     info.port_process = port;
 }
 
-
-
-
 void connect_client(struct sockaddr_in server) {
     struct timespec time_ex;
 
@@ -94,12 +93,7 @@ void connect_client(struct sockaddr_in server) {
         printf("Send failed\n");
         exit(EXIT_FAILURE);
     }
-
-
 }
-
-
-
 
 void connect_server(struct sockaddr_in server){
     //srand(time(0));
@@ -229,9 +223,6 @@ void pubs_conex(){
         printf("Send failed\n");
         exit(EXIT_FAILURE);
     }
-
-
-
 }
 
 void data_pub_message(char* topic){

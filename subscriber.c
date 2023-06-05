@@ -38,15 +38,9 @@ int main(int argc, char *argv[]) {
                 exit(EXIT_FAILURE);
         }
     }
-
     printf("%s\n",ip );
     printf("%i\n",port );
-
     printf("%s\n",topic );
-
-
-
-
     return 0;
 }
 
