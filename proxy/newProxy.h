@@ -52,7 +52,7 @@ struct timespec connectClient(struct sockaddr_in server);
 void connectPublisher(struct sockaddr_in server);
 void connectSubscriber(struct sockaddr_in server);
 void connectServer(struct sockaddr_in server);
-struct timespec registerClient(char* topic);
+void registerClient(char* topic);
 void registerPublisher(char* topic);
 void registerSubscriber(char* topic);
 void processNewRegistration();

@@ -75,6 +75,8 @@ void trySendingMessage(struct message toSend){
         printf("Send failed\n");
         exit(EXIT_FAILURE);
     }
+    else
+        printf("Message for registration succesfully send\n");
 }
 
 struct timespec connectClient(struct sockaddr_in server) {
