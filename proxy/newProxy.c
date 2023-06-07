@@ -98,7 +98,7 @@ void connectSubscriber(struct sockaddr_in server){
     printf("[%ld.%ld] Suscriptor conectado con el broker correctamente.\n",expectedTime.tv_sec,expectedTime.tv_nsec);
 }
 
-struct timespec registerClient(char* topic){
+void registerClient(char* topic){
     struct timespec expectedTime;
     clock_gettime( CLOCK_REALTIME , &expectedTime);
     double pub_t = expectedTime.tv_nsec;
@@ -110,14 +110,22 @@ struct timespec registerClient(char* topic){
     resFromBroker.id = pub_fd;
     resFromBroker.response_status = OK;
 
-    if( recv(fd_socket , &resFromBroker , sizeof(resFromBroker) , 0) < 0){
+    printf("ID: %d\n", resFromBroker.id);
+
+    if (resFromBroker.response_status == 0) {
+        printf("STATUS: ERROR\n");
+    } else if (resFromBroker.response_status == 0) {
+        printf("STATUS: LIMIT\n");
+    } else {
+        printf("STATUS: OK\n");
+    }
+
+    printf("[%ld.%ld] Registrado correctamente con ID: %d para topic %s\n",expectedTime.tv_sec,expectedTime.tv_nsec,resFromBroker.id,msgToBroker.topic );
+
+    if(recv(fd_socket , &resFromBroker , sizeof(resFromBroker) , 0) < 0){
         printf("Send failed\n");
         exit(EXIT_FAILURE);
     }
-    printf("ID: %d\n", resFromBroker.id);
-    printf("STATUS: %d\n", resFromBroker.response_status);
-
-    printf("[%ld.%ld] Registrado correctamente con ID: %d para topic %s\n",expectedTime.tv_sec,expectedTime.tv_nsec,resFromBroker.id,msgToBroker.topic );
 }
 
 void registerPublisher(char* topic){

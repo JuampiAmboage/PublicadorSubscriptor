@@ -15,6 +15,7 @@
 
 
 #include <getopt.h> //para getopt_long
+#include <stdbool.h>
 
 struct sockaddr_in getServer(int client_or_server);
 
@@ -63,4 +64,5 @@ int main(int argc, char *argv[]) {
         processNewRegistration();
     }
     return 0;
+
 }
