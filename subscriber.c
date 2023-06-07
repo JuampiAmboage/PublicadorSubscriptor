@@ -4,9 +4,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "proxy/proxy.h"
-#include "./process/process.h"
-// #include <Winsock2.h>
+#include "proxy/newProxy.h"
+#include <Winsock2.h>
+
 
 
 struct sockaddr_in getDetail(int client_or_server);
@@ -17,9 +17,6 @@ int main(int argc, char *argv[]) {
     int opt= 0;
     int port;
     char *ip,*topic;
-
-    // create process
-    // Process subscriberProcess = initializeProcess();
 
     static struct option long_options[] = {
             {"ip",      required_argument,       0,  'a' },
@@ -54,8 +51,8 @@ int main(int argc, char *argv[]) {
     set_ip_port(ip, port);
     struct sockaddr_in server;
 
-    //server = getDetail(0);
-    //connect_client(server);
+    server = getDetail(0);
+    connect_client(server);
 
     return 0;
 }

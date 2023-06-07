@@ -1,18 +1,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-//#include <Winsock2.h>
+//#include <sys/socket.h>
+//#include <netinet/in.h>
+#include <Winsock2.h>
 #include <string.h>
 #include <unistd.h>
 #include <signal.h>
-#include <arpa/inet.h>
+//#include <arpa/inet.h>
 #include <errno.h>
 #include <pthread.h>
 
-#include "proxy/proxy.h"
-#include "./process/process.h"
+#include "proxy/newProxy.h"
+//#include "./process/process.h"
 
 
 #include <getopt.h> //para getopt_long
@@ -57,14 +57,14 @@ int main(int argc, char *argv[]) {
 
 
 
-    set_ip_port(ip,port);
+    setIpPort(ip,port);
     //estructura del tipo sockaddr para server, guarda info del server
     struct sockaddr_in server;
 
-    server = getDetail(0);
-    connect_client(server);
 
-    data_pub_message(topic);
+
+    server = getDetail(0);
+    connectPublisher(server);
 
 
     return 0;

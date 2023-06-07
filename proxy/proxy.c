@@ -1,11 +1,11 @@
 #include <stdlib.h>
 #include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
+//#include <sys/socket.h>
+//#include <netinet/in.h>
 #include <unistd.h>
 #include <signal.h>
-#include <arpa/inet.h>
-//#include <Winsock2.h>
+//#include <arpa/inet.h>
+#include <Winsock2.h>
 
 #include <errno.h>
 #include <pthread.h>
@@ -21,11 +21,12 @@
 struct ip_port info;
 struct message pub2broker;
 struct message else2broker;
+struct message sub2broker;
 struct response broker2pub;
 struct response broker2pub_response;
+struct response broker2sub_response;
 
 int fd_socket = 0, fd = 0, pub_fd = 0, sub_fd = 0;
-
 
 struct sockaddr_in getDetail(int client_or_server);
 
@@ -270,8 +271,9 @@ void data_pub_message(char* topic){
     //printf("STATUS: %d\n", broker2pub_response.response_status);
 
     printf("[%ld.%ld] Registrado correctamente con ID: %d para topic %s\n",time_ex.tv_sec,time_ex.tv_nsec,broker2pub_response.id,pub2broker.topic );
-
 }
+
+
 
 
 
@@ -285,3 +287,28 @@ void clients_closing(){
     close(fd_socket);
 }
 
+void data_sub_message(char* topic){
+    struct timespec time_ex;
+
+    clock_gettime( CLOCK_REALTIME , &time_ex);
+    double pub_t = time_ex.tv_nsec;
+
+
+    strcpy(else2broker.topic, topic);
+
+    if( send(fd_socket , &sub2broker , sizeof(sub2broker) , 0) < 0){
+        printf("Send failed\n");
+        exit(EXIT_FAILURE);
+    }
+
+    if( recv(fd_socket , &broker2sub_response , sizeof(broker2sub_response) , 0) < 0){
+        printf("Send failed\n");
+        exit(EXIT_FAILURE);
+    }
+
+    printf("ID: %d\n", broker2sub_response.id);
+    printf("STATUS: %d\n", broker2sub_response.response_status);
+
+    printf("[%ld.%ld] Registrado correctamente con ID: %d para topic %s\n",time_ex.tv_sec,time_ex.tv_nsec,broker2pub_response.id,pub2broker.topic );
+
+}
