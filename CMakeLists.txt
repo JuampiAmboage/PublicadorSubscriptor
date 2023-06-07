@@ -3,4 +3,4 @@ project(PublicadorSubscriptor C)
 
 set(CMAKE_C_STANDARD 11)
 
-add_executable(PublicadorSubscriptor broker.c proxy/proxy.c publisher.c subscriber.c proxy/proxy.h process/process.c process/process.h)
+add_executable(PublicadorSubscriptor broker.c proxy/proxy.c publisher.c subscriber.c proxy/proxy.h main.c)

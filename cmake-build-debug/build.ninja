@@ -73,11 +73,11 @@ build CMakeFiles/PublicadorSubscriptor.dir/subscriber.c.o: C_COMPILER__Publicado
   OBJECT_DIR = CMakeFiles/PublicadorSubscriptor.dir
   OBJECT_FILE_DIR = CMakeFiles/PublicadorSubscriptor.dir
 
-build CMakeFiles/PublicadorSubscriptor.dir/process/process.c.o: C_COMPILER__PublicadorSubscriptor_Debug /home/joaco/Desktop/TPs$ andy/PublicadorSubscriptor/process/process.c || cmake_object_order_depends_target_PublicadorSubscriptor
-  DEP_FILE = CMakeFiles/PublicadorSubscriptor.dir/process/process.c.o.d
+build CMakeFiles/PublicadorSubscriptor.dir/main.c.o: C_COMPILER__PublicadorSubscriptor_Debug /home/joaco/Desktop/TPs$ andy/PublicadorSubscriptor/main.c || cmake_object_order_depends_target_PublicadorSubscriptor
+  DEP_FILE = CMakeFiles/PublicadorSubscriptor.dir/main.c.o.d
   FLAGS = -g -fdiagnostics-color=always -std=gnu11
   OBJECT_DIR = CMakeFiles/PublicadorSubscriptor.dir
-  OBJECT_FILE_DIR = CMakeFiles/PublicadorSubscriptor.dir/process
+  OBJECT_FILE_DIR = CMakeFiles/PublicadorSubscriptor.dir
 
 
 # =============================================================================
@@ -87,7 +87,7 @@ build CMakeFiles/PublicadorSubscriptor.dir/process/process.c.o: C_COMPILER__Publ
 #############################################
 # Link the executable PublicadorSubscriptor
 
-build PublicadorSubscriptor: C_EXECUTABLE_LINKER__PublicadorSubscriptor_Debug CMakeFiles/PublicadorSubscriptor.dir/broker.c.o CMakeFiles/PublicadorSubscriptor.dir/proxy/proxy.c.o CMakeFiles/PublicadorSubscriptor.dir/publisher.c.o CMakeFiles/PublicadorSubscriptor.dir/subscriber.c.o CMakeFiles/PublicadorSubscriptor.dir/process/process.c.o
+build PublicadorSubscriptor: C_EXECUTABLE_LINKER__PublicadorSubscriptor_Debug CMakeFiles/PublicadorSubscriptor.dir/broker.c.o CMakeFiles/PublicadorSubscriptor.dir/proxy/proxy.c.o CMakeFiles/PublicadorSubscriptor.dir/publisher.c.o CMakeFiles/PublicadorSubscriptor.dir/subscriber.c.o CMakeFiles/PublicadorSubscriptor.dir/main.c.o
   FLAGS = -g
   OBJECT_DIR = CMakeFiles/PublicadorSubscriptor.dir
   POST_BUILD = :

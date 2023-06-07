@@ -19,7 +19,7 @@
 
 struct sockaddr_in getDetail(int client_or_server);
 
-int main(int argc, char *argv[]) {
+int subscriber(int argc, char *argv[]) {
     setbuf(stdout, NULL);
 
     int opt= 0;
