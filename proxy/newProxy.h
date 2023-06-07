@@ -51,10 +51,11 @@ void trySendingMessage(struct message toSend);
 struct timespec connectClient(struct sockaddr_in server);
 void connectPublisher(struct sockaddr_in server);
 void connectSubscriber(struct sockaddr_in server);
+void connectServer(struct sockaddr_in server);
 struct timespec registerClient(char* topic);
 void registerPublisher(char* topic);
 void registerSubscriber(char* topic);
-void processNewRegistration(char* mode);
+void processNewRegistration();
 void serverClosing();
 //void * socketThread(void *fd);
 

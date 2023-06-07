@@ -57,10 +57,10 @@ int main(int argc, char *argv[]) {
     struct sockaddr_in server;
     server = getDetail(1);
 
-    connect_server(server);
+    connectServer(server);
 
     while(1){
-        client_accept(mode);
+        processNewRegistration();
     }
     return 0;
 }

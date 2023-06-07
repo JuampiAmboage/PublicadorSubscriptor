@@ -172,6 +172,47 @@ void processNewRegistration(char* mode){
     }
 }
 
+void connectServer(){
+    int dir_socket, listen_socket;
+
+    fd_socket = socket(AF_INET, SOCK_STREAM, 0);
+
+    if ((fd_socket ) < 0){
+        perror("Socket open error");
+        exit(EXIT_FAILURE);
+    }
+    else{
+        printf("Socket successfully created...\n");
+    }
+
+    const int enable = 1;
+    if (setsockopt(fd_socket, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0)
+        perror("setsockopt(SO_REUSEADDR) failed");
+
+    //avisamos al sistema que se creó un socket
+    dir_socket = bind(fd_socket,(struct sockaddr *) &server, sizeof(server) );
+
+    if ((dir_socket ) < 0){
+        printf("%i",dir_socket);
+        printf("Bind error\n");
+        exit(EXIT_FAILURE);
+    }
+    else{
+        printf("Socket successfully binded...\n");
+    }
+    //establecemos el socket en modo escucha
+    //listen en el socket, con 1000 solicitudes de conexión máximas en cola
+    //set the backlog to 65635; instead it tells the kernel to use the biggest backlog that it feels comfortable with
+    listen_socket = listen(fd_socket, 1000);//?????
+    if(listen_socket == -1) {
+        printf("Listen error\n");
+        exit(EXIT_FAILURE);
+    }
+    else{
+        printf("Server listening...\n");
+    }
+}
+
 void serverClosing(){
     close(fd_socket);
 }
