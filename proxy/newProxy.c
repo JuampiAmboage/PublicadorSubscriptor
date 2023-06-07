@@ -12,8 +12,12 @@
 #include "newProxy.h"
 
 struct ip_port info;
+
 struct message msgToBroker;
+struct message regPublisher;
+
 struct response resFromBroker;
+
 int fd_socket = 0, fd = 0, pub_fd = 0, sub_fd = 0;
 
 void setIpPort (char* ip, unsigned int port){
@@ -127,21 +131,20 @@ void processNewRegistration(char* mode){
 
     struct message requestedAction;
 
-    while(1){
-        fd = accept(fd_socket,(struct sockaddr*)NULL, NULL);
-        if (fd == -1) {
-            printf("error en accept()\n");
-            exit(EXIT_FAILURE);
-        }
-        else{
-            printf("%s","Conexión aceptada\n" );
-        }
-        if ((recv(fd, &requestedAction, sizeof(requestedAction),0)) < 0){
-            printf("recv failed");
-        }
-        else{
+    fd = accept(fd_socket,(struct sockaddr*)NULL, NULL);
+    if (fd == -1) {
+        printf("error en accept()\n");
+        exit(EXIT_FAILURE);
+    }
+    else{
+        printf("%s","Conexión aceptada\n" );
+    }
+    if ((recv(fd, &requestedAction, sizeof(requestedAction),0)) < 0){
+        printf("recv failed");
+    }
+    else {
 
-            printf("%i\n", fd);
+        printf("%i\n", fd);
 
             if(requestedAction.action == REGISTER_PUBLISHER){
                 printf("PUB: %d\n",requestedAction.action );
