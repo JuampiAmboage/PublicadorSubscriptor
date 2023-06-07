@@ -12,6 +12,11 @@
 
 #include "newProxy.h"
 
+#define MAX_PUBLISHERS 100
+#define MAX_SUBSCRIBERS 900
+#define MAX_TOPICS 10
+#define SIZE_BUFFER 6000
+
 struct ip_port info;
 
 struct message msgToBroker;
@@ -139,21 +144,20 @@ void registerSubscriber(char* topic){
 }
 
 void processNewRegistration(){
-    pthread_t threads[50];
-    int incoming_clients = 0;
-
+    int numPublishers = 0;
     struct message requestedAction;
+    int clientSocket = accept(fd_socket, (struct sockaddr*)NULL, NULL);
 
-    fd = accept(fd_socket,(struct sockaddr*)NULL, NULL);
-    if (fd == -1) {
-        printf("error en accept()\n");
+    if (clientSocket == -1) {
+        printf("Error en accept()\n");
         exit(EXIT_FAILURE);
+    } else {
+        printf("Conexión aceptada\n");
     }
-    else{
-        printf("%s","Conexión aceptada\n" );
-    }
-    if ((recv(fd, &requestedAction, sizeof(requestedAction),0)) < 0){
-        printf("recv failed");
+
+    if (recv(clientSocket, &requestedAction, sizeof(requestedAction), 0) < 0) {
+        printf("Error al recibir la solicitud\n");
+        exit(EXIT_FAILURE);
     }
     else {
 
@@ -161,7 +165,12 @@ void processNewRegistration(){
 
             if(requestedAction.action == REGISTER_PUBLISHER){
                 printf("PUB: %d\n",requestedAction.action );
-                pub_fd = fd;
+                int* client_fd = malloc(sizeof(int));
+                *client_fd = clientSocket;
+                pthread_t publisherThreads[MAX_PUBLISHERS];
+                pthread_create(&publisherThreads[numPublishers], NULL, publisherRegistration, (void*)&clientSocket);
+                numPublishers++;
+                }
             }
             else if(requestedAction.action == REGISTER_SUBSCRIBER){
                 printf("SUB: %d\n",requestedAction.action );
