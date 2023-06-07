@@ -12,7 +12,6 @@
 #include <pthread.h>
 
 #include "proxy/proxy.h"
-#include "./process/process.h"
 
 
 #include <getopt.h> //para getopt_long

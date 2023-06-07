@@ -12,7 +12,6 @@
 #include <pthread.h>
 
 #include "proxy/proxy.h"
-#include "./process/process.h"
 
 
 #include <getopt.h> //para getopt_long
@@ -37,7 +36,7 @@ int main(int argc, char *argv[]) {
 
     };
 
-    int long_index =0;
+    int long_index = 0;
     while ((opt = getopt_long(argc, argv,"ab",long_options, &long_index )) != -1) {
         switch (opt) {
             case 'a' :

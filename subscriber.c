@@ -1,12 +1,20 @@
-#include <errno.h>
-#include <pthread.h>
-#include <getopt.h> //para getopt_long
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+//#include <Winsock2.h>
+#include <string.h>
+#include <unistd.h>
+#include <signal.h>
+#include <arpa/inet.h>
+#include <errno.h>
+#include <pthread.h>
 
 #include "proxy/proxy.h"
-#include "./process/process.h"
-// #include <Winsock2.h>
+
+
+#include <getopt.h> //para getopt_long
 
 
 struct sockaddr_in getDetail(int client_or_server);
@@ -54,8 +62,8 @@ int main(int argc, char *argv[]) {
     set_ip_port(ip, port);
     struct sockaddr_in server;
 
-    //server = getDetail(0);
-    //connect_client(server);
+    server = getDetail(0);
+    connect_client(server);
 
     return 0;
 }
