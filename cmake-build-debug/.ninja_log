@@ -1,6 +1,0 @@
-# ninja log v5
-1	95	1686148851736855223	CMakeFiles/PublicadorSubscriptor.dir/publisher.c.o	2daa561e847d2314
-1	36	1686149001813867680	CMakeFiles/PublicadorSubscriptor.dir/main.c.o	77d2ddf8b20618f7
-1	98	1686148851736855223	CMakeFiles/PublicadorSubscriptor.dir/subscriber.c.o	2ed554a56671a159
-1	105	1686148851744855035	CMakeFiles/PublicadorSubscriptor.dir/proxy/proxy.c.o	20e4556d43921d8e
-0	98	1686148851736855223	CMakeFiles/PublicadorSubscriptor.dir/broker.c.o	d9df359723e7b3ff
