@@ -4,8 +4,8 @@
 //#include <netinet/in.h>
 #include <unistd.h>
 #include <signal.h>
-//#include <arpa/inet.h>
-#include <Winsock2.h>
+#include <arpa/inet.h>
+//#include <Winsock2.h>
 
 #include <errno.h>
 #include <pthread.h>

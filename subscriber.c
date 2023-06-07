@@ -5,7 +5,8 @@
 #include <stdlib.h>
 
 #include "proxy/newProxy.h"
-#include <Winsock2.h>
+//#include <Winsock2.h>
+#include <arpa/inet.h>
 
 
 

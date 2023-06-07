@@ -2,12 +2,13 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <signal.h>
-#include <Winsock2.h>
+//#include <Winsock2.h>
 #include <errno.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <string.h>
 #include <semaphore.h>
+#include <arpa/inet.h>
 
 #include "newProxy.h"
 

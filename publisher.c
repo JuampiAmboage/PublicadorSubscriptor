@@ -3,11 +3,11 @@
 #include <sys/types.h>
 //#include <sys/socket.h>
 //#include <netinet/in.h>
-#include <Winsock2.h>
+//#include <Winsock2.h>
 #include <string.h>
 #include <unistd.h>
 #include <signal.h>
-//#include <arpa/inet.h>
+#include <arpa/inet.h>
 #include <errno.h>
 #include <pthread.h>
 
