@@ -1,13 +1,4 @@
 /snap/clion/237/bin/cmake/linux/x64/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/snap/clion/237/bin/ninja/linux/x64/ninja -G Ninja -S "/home/joaco/Desktop/TPs andy/PublicadorSubscriptor" -B "/home/joaco/Desktop/TPs andy/PublicadorSubscriptor/cmake-build-debug"
 -- Configuring done
-CMake Error at CMakeLists.txt:6 (add_executable):
-  Cannot find source file:
-
-    process/process.c
-
-
-CMake Error at CMakeLists.txt:6 (add_executable):
-  No SOURCES given to target: PublicadorSubscriptor
-
-
-CMake Generate step failed.  Build files cannot be regenerated correctly.
+-- Generating done
+-- Build files have been written to: /home/joaco/Desktop/TPs andy/PublicadorSubscriptor/cmake-build-debug
