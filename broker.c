@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
             {"mode", required_argument,       0,  'b' },
     };
 
-    int long_index =0;
+    int long_index = 0;
     while ((opt = getopt_long(argc, argv,"ab",long_options, &long_index )) != -1) {
         switch (opt) {
             case 'a' :
@@ -52,7 +52,8 @@ int main(int argc, char *argv[]) {
     printf("%i\n",port );
     printf("%s\n",mode );
 
-    setPort(port);
+    char* ip = "0.0.0.0"; // 0.0.0.0 / localhost
+    setIpPort(ip, port);
     //estructura del tipo sockaddr para server, guarda info del server
     struct sockaddr_in server;
     server = getServer(1);

@@ -40,6 +40,12 @@ struct sockaddr_in getServer(int client_or_server){
         server.sin_addr.s_addr = htonl(INADDR_ANY);//Cualquier interfaz(IP) del server
 
     server.sin_port = htons(info.port_process);
+
+
+    printf("---> IP: %s\n", info.ip_process);
+    printf("---> STATUS_CODE: %d\n", server.sin_addr.s_addr);
+    printf("---> PORT: %d\n",server.sin_port);
+
     return server;
 }
 
