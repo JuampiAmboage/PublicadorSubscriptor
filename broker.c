@@ -48,13 +48,14 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    printf("---> MODE: %s\n",mode);
-
     char* ip = "0.0.0.0"; // 0.0.0.0 / localhost
     setIpPort(ip, port);
+
     //estructura del tipo sockaddr para server, guarda info del server
     struct sockaddr_in server;
+
     server = getServer(1);
+    printf("---> MODE: %s\n",mode);
 
     connectServer(server);
 
