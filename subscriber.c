@@ -6,7 +6,7 @@
 
 #include "proxy/proxy.h"
 #include "./process/process.h"
-#include <Winsock2.h>
+// #include <Winsock2.h>
 
 
 struct sockaddr_in getDetail(int client_or_server);

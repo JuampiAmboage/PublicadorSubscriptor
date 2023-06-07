@@ -49,11 +49,35 @@ cmake_ninja_workdir = /home/joaco/Desktop/TPs$ andy/PublicadorSubscriptor/cmake-
 
 build cmake_object_order_depends_target_PublicadorSubscriptor: phony || CMakeFiles/PublicadorSubscriptor.dir
 
-build CMakeFiles/PublicadorSubscriptor.dir/test.c.o: C_COMPILER__PublicadorSubscriptor_Debug /home/joaco/Desktop/TPs$ andy/PublicadorSubscriptor/test.c || cmake_object_order_depends_target_PublicadorSubscriptor
-  DEP_FILE = CMakeFiles/PublicadorSubscriptor.dir/test.c.o.d
+build CMakeFiles/PublicadorSubscriptor.dir/broker.c.o: C_COMPILER__PublicadorSubscriptor_Debug /home/joaco/Desktop/TPs$ andy/PublicadorSubscriptor/broker.c || cmake_object_order_depends_target_PublicadorSubscriptor
+  DEP_FILE = CMakeFiles/PublicadorSubscriptor.dir/broker.c.o.d
   FLAGS = -g -fdiagnostics-color=always -std=gnu11
   OBJECT_DIR = CMakeFiles/PublicadorSubscriptor.dir
   OBJECT_FILE_DIR = CMakeFiles/PublicadorSubscriptor.dir
+
+build CMakeFiles/PublicadorSubscriptor.dir/proxy/proxy.c.o: C_COMPILER__PublicadorSubscriptor_Debug /home/joaco/Desktop/TPs$ andy/PublicadorSubscriptor/proxy/proxy.c || cmake_object_order_depends_target_PublicadorSubscriptor
+  DEP_FILE = CMakeFiles/PublicadorSubscriptor.dir/proxy/proxy.c.o.d
+  FLAGS = -g -fdiagnostics-color=always -std=gnu11
+  OBJECT_DIR = CMakeFiles/PublicadorSubscriptor.dir
+  OBJECT_FILE_DIR = CMakeFiles/PublicadorSubscriptor.dir/proxy
+
+build CMakeFiles/PublicadorSubscriptor.dir/publisher.c.o: C_COMPILER__PublicadorSubscriptor_Debug /home/joaco/Desktop/TPs$ andy/PublicadorSubscriptor/publisher.c || cmake_object_order_depends_target_PublicadorSubscriptor
+  DEP_FILE = CMakeFiles/PublicadorSubscriptor.dir/publisher.c.o.d
+  FLAGS = -g -fdiagnostics-color=always -std=gnu11
+  OBJECT_DIR = CMakeFiles/PublicadorSubscriptor.dir
+  OBJECT_FILE_DIR = CMakeFiles/PublicadorSubscriptor.dir
+
+build CMakeFiles/PublicadorSubscriptor.dir/subscriber.c.o: C_COMPILER__PublicadorSubscriptor_Debug /home/joaco/Desktop/TPs$ andy/PublicadorSubscriptor/subscriber.c || cmake_object_order_depends_target_PublicadorSubscriptor
+  DEP_FILE = CMakeFiles/PublicadorSubscriptor.dir/subscriber.c.o.d
+  FLAGS = -g -fdiagnostics-color=always -std=gnu11
+  OBJECT_DIR = CMakeFiles/PublicadorSubscriptor.dir
+  OBJECT_FILE_DIR = CMakeFiles/PublicadorSubscriptor.dir
+
+build CMakeFiles/PublicadorSubscriptor.dir/process/process.c.o: C_COMPILER__PublicadorSubscriptor_Debug /home/joaco/Desktop/TPs$ andy/PublicadorSubscriptor/process/process.c || cmake_object_order_depends_target_PublicadorSubscriptor
+  DEP_FILE = CMakeFiles/PublicadorSubscriptor.dir/process/process.c.o.d
+  FLAGS = -g -fdiagnostics-color=always -std=gnu11
+  OBJECT_DIR = CMakeFiles/PublicadorSubscriptor.dir
+  OBJECT_FILE_DIR = CMakeFiles/PublicadorSubscriptor.dir/process
 
 
 # =============================================================================
@@ -63,7 +87,7 @@ build CMakeFiles/PublicadorSubscriptor.dir/test.c.o: C_COMPILER__PublicadorSubsc
 #############################################
 # Link the executable PublicadorSubscriptor
 
-build PublicadorSubscriptor: C_EXECUTABLE_LINKER__PublicadorSubscriptor_Debug CMakeFiles/PublicadorSubscriptor.dir/test.c.o
+build PublicadorSubscriptor: C_EXECUTABLE_LINKER__PublicadorSubscriptor_Debug CMakeFiles/PublicadorSubscriptor.dir/broker.c.o CMakeFiles/PublicadorSubscriptor.dir/proxy/proxy.c.o CMakeFiles/PublicadorSubscriptor.dir/publisher.c.o CMakeFiles/PublicadorSubscriptor.dir/subscriber.c.o CMakeFiles/PublicadorSubscriptor.dir/process/process.c.o
   FLAGS = -g
   OBJECT_DIR = CMakeFiles/PublicadorSubscriptor.dir
   POST_BUILD = :
