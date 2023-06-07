@@ -57,6 +57,8 @@ void registerPublisher(char* topic);
 void registerSubscriber(char* topic);
 void processNewRegistration();
 void serverClosing();
+void setPort(unsigned int port);
+void setIpPort(char* ip, unsigned int port);
 //void * socketThread(void *fd);
 
 

@@ -125,8 +125,7 @@ void registerSubscriber(char* topic){
     registerClient(topic);
 }
 
-void processNewRegistration(char* mode){
-    printf("%s\n",mode );
+void processNewRegistration(){
     pthread_t threads[50];
     int incoming_clients = 0;
 
@@ -161,18 +160,18 @@ void processNewRegistration(char* mode){
             //int *pclient = malloc(sizeof(int));
             //*pclient = fd_client_socket;
             //thread = pthread_create(&threads[incoming_clients + 1], NULL, socketThread, pclient);
-            int thread = pthread_create(&threads[incoming_clients + 1], NULL, socketThread, NULL);
+
+            /*int thread = pthread_create(&threads[incoming_clients + 1], NULL, socketThread, NULL);
             incoming_clients += 1;
 
             if (thread) {
                 printf("ERROR; return code from pthread_create() is %d\n", thread);
                 exit(EXIT_FAILURE);
-            }
+            }*/
         }
     }
-}
 
-void connectServer(){
+void connectServer(struct sockaddr_in server){
     int dir_socket, listen_socket;
 
     fd_socket = socket(AF_INET, SOCK_STREAM, 0);

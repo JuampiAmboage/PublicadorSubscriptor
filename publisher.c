@@ -17,7 +17,7 @@
 
 #include <getopt.h> //para getopt_long
 
-struct sockaddr_in getDetail(int client_or_server);
+struct sockaddr_in getServer(int client_or_server);
 
 int main(int argc, char *argv[]) {
     setbuf(stdout, NULL);
@@ -63,7 +63,7 @@ int main(int argc, char *argv[]) {
 
 
 
-    server = getDetail(0);
+    server = getServer(0);
     connectPublisher(server);
 
 

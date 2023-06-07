@@ -10,7 +10,7 @@
 
 
 
-struct sockaddr_in getDetail(int client_or_server);
+struct sockaddr_in getServer(int client_or_server);
 
 int main(int argc, char *argv[]) {
     setbuf(stdout, NULL);
@@ -49,11 +49,11 @@ int main(int argc, char *argv[]) {
     printf("%s\n",topic );
 
 
-    set_ip_port(ip, port);
+    setIpPort(ip, port);
     struct sockaddr_in server;
 
-    server = getDetail(0);
-    connect_client(server);
+    server = getServer(0);
+    connectSubscriber(server);
 
     return 0;
 }

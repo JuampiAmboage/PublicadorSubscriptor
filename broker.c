@@ -6,8 +6,8 @@
 #include <string.h>
 #include <unistd.h>
 #include <signal.h>
-//#include <arpa/inet.h>
-#include <Winsock2.h>
+#include <arpa/inet.h>
+//#include <Winsock2.h>
 #include <errno.h>
 #include <pthread.h>
 
@@ -16,7 +16,7 @@
 
 #include <getopt.h> //para getopt_long
 
-struct sockaddr_in getDetail(int client_or_server);
+struct sockaddr_in getServer(int client_or_server);
 
 
 int main(int argc, char *argv[]) {
@@ -52,10 +52,10 @@ int main(int argc, char *argv[]) {
     printf("%i\n",port );
     printf("%s\n",mode );
 
-    set_port(port);
+    setPort(port);
     //estructura del tipo sockaddr para server, guarda info del server
     struct sockaddr_in server;
-    server = getDetail(1);
+    server = getServer(1);
 
     connectServer(server);
 
