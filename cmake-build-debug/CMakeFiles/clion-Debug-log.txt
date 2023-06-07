@@ -1,13 +1,4 @@
-"C:\Program Files\JetBrains\CLion 2023.1.3\bin\cmake\win\x64\bin\cmake.exe" -DCMAKE_BUILD_TYPE=Debug "-DCMAKE_MAKE_PROGRAM=C:/Program Files/JetBrains/CLion 2023.1.3/bin/ninja/win/x64/ninja.exe" -G Ninja -S "C:\Users\juamp\OneDrive\Documentos\B- TPS Andy\Pub-Sub\PublicadorSubscriptor" -B "C:\Users\juamp\OneDrive\Documentos\B- TPS Andy\Pub-Sub\PublicadorSubscriptor\cmake-build-debug"
+/snap/clion/237/bin/cmake/linux/x64/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" -S "/home/joaco/Desktop/TPs andy/PublicadorSubscriptor" -B "/home/joaco/Desktop/TPs andy/PublicadorSubscriptor/cmake-build-debug"
 -- Configuring done
-CMake Error at CMakeLists.txt:6 (add_executable):
-  Cannot find source file:
-
-    process/process.c
-
-
-CMake Error at CMakeLists.txt:6 (add_executable):
-  No SOURCES given to target: PublicadorSubscriptor
-
-
-CMake Generate step failed.  Build files cannot be regenerated correctly.
+-- Generating done
+-- Build files have been written to: /home/joaco/Desktop/TPs andy/PublicadorSubscriptor/cmake-build-debug
