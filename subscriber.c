@@ -44,15 +44,13 @@ int main(int argc, char *argv[]) {
                 exit(EXIT_FAILURE);
         }
     }
-    printf("%s\n",ip );
-    printf("%i\n",port );
-    printf("%s\n",topic );
-
 
     setIpPort(ip, port);
     struct sockaddr_in server;
 
     server = getServer(0);
+    printf("---> TOPIC: %s\n",topic);
+
     connectSubscriber(server);
     registerSubscriber(topic);
 

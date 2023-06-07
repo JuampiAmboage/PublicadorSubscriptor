@@ -25,9 +25,6 @@ void setIpPort (char* ip, unsigned int port){
     info.ip_process = ip;
     info.port_process = port;
 }
-void setPort (unsigned int port){
-    info.port_process = port;
-}
 
 struct sockaddr_in getServer(int client_or_server){
     // temp structure variable
