@@ -54,6 +54,7 @@ int main(int argc, char *argv[]) {
 
     server = getServer(0);
     connectSubscriber(server);
+    registerSubscriber(topic);
 
     return 0;
 }

@@ -48,9 +48,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
-
-    printf("%i\n",port );
-    printf("%s\n",mode );
+    printf("---> MODE: %s\n",mode);
 
     char* ip = "0.0.0.0"; // 0.0.0.0 / localhost
     setIpPort(ip, port);

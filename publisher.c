@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
 
     server = getServer(0);
     connectPublisher(server);
-
+    registerPublisher(topic);
 
     return 0;
 }
