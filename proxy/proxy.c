@@ -29,6 +29,11 @@ int fd_socket = 0, fd = 0, pub_fd = 0, sub_fd = 0;
 
 struct sockaddr_in getDetail(int client_or_server);
 
+
+/*Esta función devuelve una estructura struct sockaddr_in que contiene los detalles del servidor
+ * o cliente según el parámetro client_or_server. Establece la dirección IP, el puerto y otra información
+ * necesaria. La implementación es la siguiente:*/
+
 struct sockaddr_in getDetail(int client_or_server){
     // temp structure variable
     struct sockaddr_in server;
@@ -48,7 +53,8 @@ struct sockaddr_in getDetail(int client_or_server){
     return server;
 }
 
-
+/*Esta función establece la dirección IP y el puerto para el servidor o cliente.
+ * Actualiza la estructura info con la dirección IP y el puerto proporcionados.*/
 
 void set_ip_port (char* ip, unsigned int port){
     info.ip_process = ip;
@@ -57,6 +63,9 @@ void set_ip_port (char* ip, unsigned int port){
 void set_port (unsigned int port){
     info.port_process = port;
 }
+
+/*Esta función crea un socket de cliente, lo conecta al servidor especificado en el parámetro server
+y envía un mensaje de registro. Establece una conexión con el servidor y envía el mensaje pub2broker.*/
 
 void connect_client(struct sockaddr_in server) {
     struct timespec time_ex;
@@ -94,6 +103,9 @@ void connect_client(struct sockaddr_in server) {
         exit(EXIT_FAILURE);
     }
 }
+
+/*Esta función crea un socket de cliente, lo conecta al servidor especificado en el parámetro server
+ * y envía un mensaje de registro. Establece una conexión con el servidor y envía el mensaje pub2broker.*/
 
 void connect_server(struct sockaddr_in server){
     //srand(time(0));
@@ -136,6 +148,9 @@ void connect_server(struct sockaddr_in server){
         printf("Server listening...\n");
     }
 }
+
+/*Esta función se llama en el contexto del servidor y acepta conexiones entrantes de clientes.
+ * Crea un hilo separado para cada conexión aceptada y llama a la función socketThread.*/
 
 void client_accept(char* mode){
     printf("%s\n",mode );
@@ -185,6 +200,9 @@ void client_accept(char* mode){
     }
 }
 
+/*Esta función se ejecuta en un hilo separado para cada conexión de cliente aceptada.
+Recibe datos del cliente y realiza acciones específicas en función de los datos recibidos.*/
+
 void * socketThread(void *arg) {
 
 
@@ -202,7 +220,8 @@ void * socketThread(void *arg) {
 
 }
 
-
+/*Esta función se llama cuando un nuevo cliente publicador se conecta al servidor.
+ * Envía una respuesta de vuelta al publicador con un ID único.*/
 void pubs_conex(){
 
     struct timespec time_ex;
@@ -224,6 +243,9 @@ void pubs_conex(){
         exit(EXIT_FAILURE);
     }
 }
+
+/*Esta función se utiliza para enviar un mensaje de registro al servidor con un tema específico.
+Actualiza la estructura pub2broker con el tema proporcionado y envía el mensaje al servidor.*/
 
 void data_pub_message(char* topic){
     struct timespec time_ex;
@@ -248,7 +270,6 @@ void data_pub_message(char* topic){
     //printf("STATUS: %d\n", broker2pub_response.response_status);
 
     printf("[%ld.%ld] Registrado correctamente con ID: %d para topic %s\n",time_ex.tv_sec,time_ex.tv_nsec,broker2pub_response.id,pub2broker.topic );
-
 
 }
 
