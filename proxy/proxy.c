@@ -1,11 +1,15 @@
+#ifdef __linux__
+#include <arpa/inet.h>
+#elif _WIN32
+#include <Winsock2.h>
+#endif
+
 #include <stdlib.h>
 #include <sys/types.h>
 //#include <sys/socket.h>
 //#include <netinet/in.h>
 #include <unistd.h>
 #include <signal.h>
-#include <arpa/inet.h>
-//#include <Winsock2.h>
 
 #include <errno.h>
 #include <pthread.h>

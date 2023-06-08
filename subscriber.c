@@ -1,3 +1,9 @@
+#ifdef __linux__
+#include <arpa/inet.h>
+#elif _WIN32
+#include <Winsock2.h>
+#endif
+
 #include <errno.h>
 #include <pthread.h>
 #include <getopt.h> //para getopt_long
@@ -5,8 +11,6 @@
 #include <stdlib.h>
 
 #include "proxy/newProxy.h"
-//#include <Winsock2.h>
-#include <arpa/inet.h>
 
 
 

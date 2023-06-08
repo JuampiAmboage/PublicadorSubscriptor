@@ -1,3 +1,9 @@
+#ifdef __linux__
+#include <arpa/inet.h>
+#elif _WIN32
+#include <Winsock2.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -6,8 +12,6 @@
 #include <string.h>
 #include <unistd.h>
 #include <signal.h>
-#include <arpa/inet.h>
-//#include <Winsock2.h>
 #include <errno.h>
 #include <pthread.h>
 
