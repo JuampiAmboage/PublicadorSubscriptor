@@ -2,13 +2,13 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <signal.h>
-#include <Winsock2.h>
+//#include <Winsock2.h>
 #include <errno.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <string.h>
 #include <semaphore.h>
-//#include <arpa/inet.h>
+#include <arpa/inet.h>
 
 #include "newProxy.h"
 
@@ -156,13 +156,13 @@ void processNewRegistration(int clientSocket){
 
     threadCreateResult = pthread_create(&thread, NULL, (void*)registerPublisher, (void*)pclient);
     if (threadCreateResult != 0) {
-        printf("Error creating thread for client %d\n", pclient);
+        printf("Error creating thread for client %ls\n", pclient);
         free(pclient);
     }
     pthread_join(thread,NULL);
 }
 //FUNCIÓN DE EJECUCIÓN DE HILO PARA PUBLICADOR - EN DESAROLLO
-void registerPublisher(int* client) {
+void registerPublisher(char* client) {
     resFromBroker.id = *client;
     if ((recv(fd, &requestedAction, sizeof(requestedAction),0)) < 0)
         resFromBroker.response_status = _ERROR;
