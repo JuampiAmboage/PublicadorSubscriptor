@@ -149,6 +149,7 @@ int acceptClient(){
     }
     return clientSocket;
 }
+
 //CREACIÓN DE HILOS X PUB/SUB ENTRANTE - EN DESARROLLO
 void processNewRegistration(int clientSocket){
     int* pclient = malloc(sizeof(int));
@@ -159,23 +160,29 @@ void processNewRegistration(int clientSocket){
     int threadCreateResult;
 
     threadCreateResult = pthread_create(&thread, NULL, (void*)registerPublisher, (void*)pclient);
+
     if (threadCreateResult != 0) {
         printf("Error creating thread for client %ls\n", pclient);
         free(pclient);
     }
+
     pthread_join(thread,NULL);
 }
+
 //FUNCIÓN DE EJECUCIÓN DE HILO PARA PUBLICADOR - EN DESAROLLO
 void registerPublisher(char* client) {
     resFromBroker.id = *client;
-    if ((recv(fd, &requestedAction, sizeof(requestedAction),0)) < 0)
+
+    if ((recv(*client, &requestedAction, sizeof(requestedAction),0)) < 0) {
+        printf("--------------------if---------------------\n");
         resFromBroker.response_status = _ERROR;
-    else{
+    } else {
+
+        printf("--------------------else---------------------\n");
         struct timespec time_ex;
 
         clock_gettime(CLOCK_REALTIME, &time_ex);
         double pub_t = time_ex.tv_nsec;
-
 
         printf("[%ld.%ld] Nuevo cliente (%d) Publicador conectado : %s \n",time_ex.tv_sec,time_ex.tv_nsec,pub_fd ,requestedAction.topic );
         resFromBroker.response_status = OK;
@@ -184,11 +191,15 @@ void registerPublisher(char* client) {
         printf("STATUS: %d\n",resFromBroker.response_status);
 
     }
+
     if( send(*client , &resFromBroker , sizeof(resFromBroker) , 0) < 0){
         printf("Send failed\n");
         exit(EXIT_FAILURE);
     }
-    free(client);
+
+    printf("----------------------free-------------------\n");
+
+    //free(client);
     pthread_exit(NULL);
 }
 
