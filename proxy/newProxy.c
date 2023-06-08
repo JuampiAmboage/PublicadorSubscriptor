@@ -2,13 +2,13 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <signal.h>
-//#include <Winsock2.h>
+#include <Winsock2.h>
 #include <errno.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <string.h>
 #include <semaphore.h>
-#include <arpa/inet.h>
+//#include <arpa/inet.h>
 
 #include "newProxy.h"
 
@@ -21,6 +21,7 @@ struct ip_port info;
 
 struct message msgToBroker;
 struct message regPublisher;
+struct message requestedAction;
 
 struct response resFromBroker;
 
@@ -30,7 +31,7 @@ void setIpPort (char* ip, unsigned int port){
     info.ip_process = ip;
     info.port_process = port;
 }
-
+//GETTER DEL SERVIDOR - LISTO
 struct sockaddr_in getServer(int client_or_server){
     // temp structure variable
     struct sockaddr_in server;
@@ -51,7 +52,7 @@ struct sockaddr_in getServer(int client_or_server){
     return server;
 }
 
-//tratamos de abrir el socket
+//ABRIMOS EL SOCKET - LISTO
 void trySocketCreation(){
     fd_socket = socket(AF_INET, SOCK_STREAM, 0);
     if ((fd_socket ) < 0){
@@ -63,7 +64,7 @@ void trySocketCreation(){
     }
 }
 
-//tratamos de conectarnos al servidor
+//NOS CONECTAMOS AL SERVIDOR - LISTO
 void tryServerConnection(struct sockaddr_in server){
     int connection = connect(fd_socket, (struct sockaddr *)&server,sizeof(server));
     if(connection == -1){
@@ -83,7 +84,7 @@ void trySendingMessage(struct message toSend){
     else
         printf("Message for registration succesfully send\n");
 }
-
+//CONEXIÓN DE USO COMÚN PARA PUBLICADOR Y SUBSCRIPTOR - LISTO
 struct timespec connectClient(struct sockaddr_in server) {
     struct timespec expectedTime;
     clock_gettime( CLOCK_REALTIME , &expectedTime);
@@ -92,18 +93,19 @@ struct timespec connectClient(struct sockaddr_in server) {
     trySocketCreation();
     tryServerConnection(server);
 }
-
+//CONECTARSE COMO PUBLICADOR - LISTO
 void connectPublisher(struct sockaddr_in server){
     struct timespec expectedTime = connectClient(server);
     printf("[%ld.%ld] Publisher conectado con el broker correctamente.\n",expectedTime.tv_sec,expectedTime.tv_nsec);
 }
 
+//CONECTARSE COMO SUBSCRIPTOR - LISTO
 void connectSubscriber(struct sockaddr_in server){
     struct timespec expectedTime = connectClient(server);
     printf("[%ld.%ld] Suscriptor conectado con el broker correctamente.\n",expectedTime.tv_sec,expectedTime.tv_nsec);
 }
 
-void registerClient(char* topic){
+void sendRegistration(char* topic){
     struct timespec expectedTime;
     clock_gettime( CLOCK_REALTIME , &expectedTime);
     double pub_t = expectedTime.tv_nsec;
@@ -112,40 +114,27 @@ void registerClient(char* topic){
 
     trySendingMessage(msgToBroker);
 
-    resFromBroker.id = pub_fd;
-    resFromBroker.response_status = OK;
-
-    printf("ID: %d\n", resFromBroker.id);
-
-    if (resFromBroker.response_status == 0) {
-        printf("STATUS: ERROR\n");
-    } else if (resFromBroker.response_status == 0) {
-        printf("STATUS: LIMIT\n");
-    } else {
-        printf("STATUS: OK\n");
-    }
-
-    printf("[%ld.%ld] Registrado correctamente con ID: %d para topic %s\n",expectedTime.tv_sec,expectedTime.tv_nsec,resFromBroker.id,msgToBroker.topic );
-
     if(recv(fd_socket , &resFromBroker , sizeof(resFromBroker) , 0) < 0){
         printf("Send failed\n");
         exit(EXIT_FAILURE);
     }
+
+    printf("[%ld.%ld] Registrado correctamente con ID: %d para topic %s\n",expectedTime.tv_sec,expectedTime.tv_nsec,resFromBroker.id,msgToBroker.topic );
+
 }
 
-void registerPublisher(char* topic){
+void sendPublisherRegistration(char* topic){
     msgToBroker.action = REGISTER_PUBLISHER;
-    registerClient(topic);
+    sendRegistration(topic);
 }
 
-void registerSubscriber(char* topic){
+void sendSubscriberRegistration(char* topic){
     msgToBroker.action = REGISTER_SUBSCRIBER;
-    registerClient(topic);
+    sendRegistration(topic);
 }
 
-void processNewRegistration(){
-    int numPublishers = 0;
-    struct message requestedAction;
+//DAR ID AL CLIENTE EN SERVIDOR - LISTO
+int acceptClient(){
     int clientSocket = accept(fd_socket, (struct sockaddr*)NULL, NULL);
 
     if (clientSocket == -1) {
@@ -154,45 +143,52 @@ void processNewRegistration(){
     } else {
         printf("Conexión aceptada\n");
     }
+    return clientSocket;
+}
+//CREACIÓN DE HILOS X PUB/SUB ENTRANTE - EN DESARROLLO
+void processNewRegistration(int clientSocket){
+    int* pclient = malloc(sizeof(int));
+    pclient = &clientSocket; // Asignar un ID único al cliente
 
-    if (recv(clientSocket, &requestedAction, sizeof(requestedAction), 0) < 0) {
-        printf("Error al recibir la solicitud\n");
+    // Crear un hilo para el cliente registrado
+    pthread_t thread;
+    int threadCreateResult;
+
+    threadCreateResult = pthread_create(&thread, NULL, (void*)registerPublisher, (void*)pclient);
+    if (threadCreateResult != 0) {
+        printf("Error creating thread for client %d\n", pclient);
+        free(pclient);
+    }
+    pthread_join(thread,NULL);
+}
+//FUNCIÓN DE EJECUCIÓN DE HILO PARA PUBLICADOR - EN DESAROLLO
+void registerPublisher(int* client) {
+    resFromBroker.id = *client;
+    if ((recv(fd, &requestedAction, sizeof(requestedAction),0)) < 0)
+        resFromBroker.response_status = _ERROR;
+    else{
+        struct timespec time_ex;
+
+        clock_gettime(CLOCK_REALTIME, &time_ex);
+        double pub_t = time_ex.tv_nsec;
+
+
+        printf("[%ld.%ld] Nuevo cliente (%d) Publicador conectado : %s \n",time_ex.tv_sec,time_ex.tv_nsec,pub_fd ,requestedAction.topic );
+        resFromBroker.response_status = OK;
+
+        printf("ID: %d\n",resFromBroker.id );
+        printf("STATUS: %d\n",resFromBroker.response_status);
+
+    }
+    if( send(*client , &resFromBroker , sizeof(resFromBroker) , 0) < 0){
+        printf("Send failed\n");
         exit(EXIT_FAILURE);
     }
-    else {
+    free(client);
+    pthread_exit(NULL);
+}
 
-        printf("%i\n", fd);
-
-            if(requestedAction.action == REGISTER_PUBLISHER){
-                printf("PUB: %d\n",requestedAction.action );
-                int* client_fd = malloc(sizeof(int));
-                *client_fd = clientSocket;
-                pthread_t publisherThreads[MAX_PUBLISHERS];
-                pthread_create(&publisherThreads[numPublishers], NULL, publisherRegistration, (void*)&clientSocket);
-                numPublishers++;
-                }
-            }
-            else if(requestedAction.action == REGISTER_SUBSCRIBER){
-                printf("SUB: %d\n",requestedAction.action );
-                sub_fd = fd;
-            }
-
-            //para cada solicitud del cliente crea un hilo y le asigna la solicitud del cliente para procesar
-            //para que el hilo principal pueda manejar la próxima solicitud
-            //int *pclient = malloc(sizeof(int));
-            //*pclient = fd_client_socket;
-            //thread = pthread_create(&threads[incoming_clients + 1], NULL, socketThread, pclient);
-
-            /*int thread = pthread_create(&threads[incoming_clients + 1], NULL, socketThread, NULL);
-            incoming_clients += 1;
-
-            if (thread) {
-                printf("ERROR; return code from pthread_create() is %d\n", thread);
-                exit(EXIT_FAILURE);
-            }*/
-        }
-    }
-
+//CONECTARSE AL SERVIDOR - LISTO
 void connectServer(struct sockaddr_in server){
     int dir_socket, listen_socket;
 

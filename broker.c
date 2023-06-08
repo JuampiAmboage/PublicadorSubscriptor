@@ -61,7 +61,8 @@ int main(int argc, char *argv[]) {
     connectServer(server);
 
     while(1){
-        processNewRegistration();
+        int clientSocket = acceptClient();
+        processNewRegistration(clientSocket);
     }
     return 0;
 
