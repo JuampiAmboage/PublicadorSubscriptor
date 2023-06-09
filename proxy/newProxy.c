@@ -240,7 +240,7 @@ void *registerPublisher() {
 
         recv(myId, &requestedAction, sizeof(receivedSignal), 0);
         if (requestedAction.action == PUBLISH_DATA)
-            printf("PUBLICANDO: %d\n",requestedAction.data.data);
+            printf("PUBLICANDO: %s\n",requestedAction.data.data);
 
         pthread_mutex_unlock(&mutex);
 
