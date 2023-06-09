@@ -4,6 +4,8 @@
 #define PUBLICADORSUBSCRIPTOR_NEWPROXY_H
 
 
+#include <stdbool.h>
+
 enum operations {
     REGISTER_PUBLISHER = 0,
     UNREGISTER_PUBLISHER,
@@ -63,11 +65,6 @@ void setPort(unsigned int port);
 void setIpPort(char* ip, unsigned int port);
 void sendPublication(char* msg);
 //void * socketThread(void *fd);
-
-
-
-
-
 
 void server_closing();
 void clients_closing();
