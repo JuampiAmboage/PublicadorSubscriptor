@@ -164,8 +164,9 @@ int acceptClient(){
 
 //CREACIÓN DE HILOS X PUB/SUB ENTRANTE - EN DESARROLLO
 void processNewRegistration(int clientSocket){
-    int* pclient = malloc(sizeof(int));
-    pclient = &clientSocket; // Asignar un ID único al cliente
+    //int* pclient = malloc(sizeof(int));
+    //pclient = &clientSocket; // Asignar un ID único al cliente
+    pub_fd = clientSocket;
     resFromBroker.id = clientSocket;
     pthread_t hilo;
 
@@ -176,7 +177,7 @@ void processNewRegistration(int clientSocket){
     }
     else {
         int threadCreateResult = pthread_create(&hilo, NULL,
-                                                (void *) registerPublisher, (void *) &pclient);
+                                                (void* ) registerPublisher,NULL);
         if (threadCreateResult != 0) {
             printf("Error creating thread for client %d\n", clientSocket);
         }
@@ -186,8 +187,8 @@ void processNewRegistration(int clientSocket){
 }
 
 //FUNCIÓN DE EJECUCIÓN DE HILO PARA PUBLICADOR - EN DESAROLLO
-void registerPublisher(int *client) {
-    if ((recv(*client, &requestedAction, sizeof(requestedAction),0)) < 0) {
+void *registerPublisher() {
+    if ((recv(pub_fd, &requestedAction, sizeof(requestedAction),0)) < 0) {
         printf("1----------------------if---------------------------\n");
         resFromBroker.response_status = _ERROR;
     } else {
@@ -205,14 +206,14 @@ void registerPublisher(int *client) {
 
     }
 
-    if( send(*client , &resFromBroker , sizeof(resFromBroker) , 0) < 0){
+    if( send(pub_fd , &resFromBroker , sizeof(resFromBroker) , 0) < 0){
         printf("2----------------------if---------------------------\n");
         printf("Send failed from broker\n");
         exit(EXIT_FAILURE);
     }
 
     do{
-        recv(*client, &requestedAction, sizeof(requestedAction),0);
+        recv(pub_fd, &requestedAction, sizeof(requestedAction),0);
         if (requestedAction.action == PUBLISH_DATA){
             printf("Publicamos.");
         }

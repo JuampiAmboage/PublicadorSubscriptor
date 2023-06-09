@@ -57,7 +57,7 @@ void sendPublisherRegistration(char* topic);
 void sendSubscriberRegistration(char* topic);
 int acceptClient();
 void processNewRegistration(int clientSocket);
-void registerPublisher(int *client);
+void* registerPublisher();
 void serverClosing();
 void setPort(unsigned int port);
 void setIpPort(char* ip, unsigned int port);
