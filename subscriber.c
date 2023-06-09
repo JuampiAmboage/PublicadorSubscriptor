@@ -53,7 +53,7 @@ int main(int argc, char *argv[]) {
     struct sockaddr_in server;
 
     server = getServer(0);
-    printf("---> TOPIC: %s\n",topic);
+    printf("---> TOPIC: %s\n\n",topic);
 
     connectSubscriber(server);
     registerSubscriber(topic);

@@ -38,13 +38,18 @@ struct response {
     int id;
 };
 
-
-
 struct ip_port{
     char* ip_process;
     unsigned int port_process;
 };
 
+struct signalMessage {
+    int signalType; // Tipo de señal a enviar
+};
+
+struct receivedSignal {
+    int signalType; // Tipo de señal a enviar
+};
 
 struct sockaddr_in getServer(int client_or_server);
 void trySocketCreation();

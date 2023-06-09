@@ -68,7 +68,7 @@ int main(int argc, char *argv[]) {
 
 
     server = getServer(0);
-    printf("---> TOPIC: %s\n",topic);
+    printf("---> TOPIC: %s\n\n",topic);
 
     connectPublisher(server);
     sendPublisherRegistration(topic);

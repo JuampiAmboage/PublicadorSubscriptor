@@ -27,6 +27,8 @@ struct ip_port info;
 struct message msgToBroker;
 struct message requestedAction;
 struct response resFromBroker;
+struct signalMessage signalMessage;
+struct receivedSignal receivedSignal;
 
 int receivedPublication = 0;
 
@@ -96,7 +98,6 @@ void trySendingMessage(struct message toSend) {
         exit(EXIT_FAILURE);
     } else {
         printf("Message succesfully send\n");
-        // SEND SIGNAL THREAD FOR BROKER
     }
 }
 //CONEXIÓN DE USO COMÚN PARA PUBLICADOR Y SUBSCRIPTOR - LISTO
@@ -151,6 +152,14 @@ void* threadPublication(){
     pthread_mutex_lock(&mutex);
     trySendingMessage(msgToBroker);
     pthread_cond_signal(&cond);
+
+    signalMessage.signalType = 1;
+    send(fd_socket, &signalMessage, sizeof(signalMessage), 0);
+
+    if (recv(fd_socket, &receivedSignal, sizeof(receivedSignal), 0)) {
+        signalMessage.signalType = 0;
+        send(fd_socket, &signalMessage, sizeof(signalMessage), 0);
+    }
     pthread_mutex_unlock(&mutex);
     pthread_exit(0);
 }
@@ -161,6 +170,7 @@ void sendPublication(char* msg){
     pthread_t signalThread;
     int threadCreateResult = pthread_create(&signalThread, NULL,
                                             (void *) threadPublication, NULL);
+
 }
 
 //DAR ID AL CLIENTE EN SERVIDOR - LISTO
@@ -249,17 +259,11 @@ void *registerPublisher() {
 
     do{
         pthread_mutex_lock(&mutex);
-        while(!receivedPublication){
-            pthread_cond_wait(&cond, &mutex);
-        }
-        receivedPublication = 0;  // Reiniciar la bandera
 
-        //recv(myId, &requestedAction, sizeof(requestedAction),0);
-
-
-        if (requestedAction.action == PUBLISH_DATA) {
-            printf("%s", requestedAction.data.data);
-            // Procesar la publicación recibida
+        if (recv(myId, &receivedSignal, sizeof(receivedSignal), 0)) {
+            printf("-----\n");
+            signalMessage.signalType = 0;
+            send(myId , &signalMessage , sizeof(signalMessage) , 0);
         }
 
         pthread_mutex_unlock(&mutex);

@@ -60,7 +60,7 @@ int main(int argc, char *argv[]) {
     struct sockaddr_in server;
 
     server = getServer(1);
-    printf("---> MODE: %s\n",mode);
+    printf("---> MODE: %s\n\n",mode);
 
     connectServer(server);
 
