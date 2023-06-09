@@ -64,10 +64,20 @@ int main(int argc, char *argv[]) {
 
     connectServer(server);
 
+
+    pthread_mutex_t mutex;
+    pthread_cond_t cond;
+    defineMutex(pthread_mutex_t mutexx, pthread_cond_t condd)
     while(1){
+        pthread_mutex_init(&mutex,NULL);
+        pthread_cond_init(&cond,NULL);
+
         int clientSocket = acceptClient();
         processNewRegistration(clientSocket);
     }
+
+    pthread_mutex_destroy(&mutex);
+    pthread_cond_destroy(&cond);
     return 0;
 
 }

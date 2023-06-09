@@ -28,7 +28,7 @@ struct message msgToBroker;
 struct message requestedAction;
 struct response resFromBroker;
 
-pthread_mutex_t mutex;
+
 
 pthread_t publisherThreads[MAX_PUBLISHERS];
 int registeredPublishers = 0;
@@ -166,6 +166,7 @@ int acceptClient(){
 int cantHilos = 0;
 //CREACIÓN DE HILOS X PUB/SUB ENTRANTE - EN DESARROLLO
 void processNewRegistration(int clientSocket){
+
     //int* pclient = malloc(sizeof(int));
     //pclient = &clientSocket; // Asignar un ID único al cliente
     pub_fd = clientSocket;
@@ -195,11 +196,22 @@ void processNewRegistration(int clientSocket){
         pthread_join(hilo, NULL);
         registeredPublishers++;
     }
+
+}
+
+pthread_mutex_t mutex;
+pthread_cond_t cond;
+
+void defineMutex(pthread_mutex_t mutexx, pthread_cond_t condd){
+    mutex = mutexx;
+    cond = condd;
 }
 
 //FUNCIÓN DE EJECUCIÓN DE HILO PARA PUBLICADOR - EN DESAROLLO
 void *registerPublisher() {
-    if ((recv(pub_fd, &requestedAction, sizeof(requestedAction),0)) < 0) {
+    int myId = pub_fd;
+
+    if ((recv(myId, &requestedAction, sizeof(requestedAction),0)) < 0) {
         resFromBroker.response_status = _ERROR;
     } else {
         struct timespec time_ex;
@@ -215,7 +227,7 @@ void *registerPublisher() {
 
     }
 
-    if( send(pub_fd , &resFromBroker , sizeof(resFromBroker) , 0) < 0){
+    if( send(myId , &resFromBroker , sizeof(resFromBroker) , 0) < 0){
         printf("Send failed from broker\n");
         exit(EXIT_FAILURE);
     }
@@ -225,11 +237,13 @@ void *registerPublisher() {
         pthread_cond_wait(&cond, &mutex);
 
         if (requestedAction.action == PUBLISH_DATA) {
-            printf("Publicamos.");
+            printf(requestedAction.data.data);
             // Procesar la publicación recibida
         }
-
+        sleep(3);
         pthread_mutex_unlock(&mutex);
+        pthread_cond_signal(&cond);
+
     }while(requestedAction.action != UNREGISTER_PUBLISHER);
     //free(client);
     pthread_exit(0);

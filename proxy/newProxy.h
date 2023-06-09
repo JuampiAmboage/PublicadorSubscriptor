@@ -68,6 +68,6 @@ void sendPublication(char* msg);
 
 void server_closing();
 void clients_closing();
-
+void defineMutex(pthread_mutex_t mutexx, pthread_cond_t condd);
 
 #endif //PUBLICADORSUBSCRIPTOR_NEWPROXY_H
