@@ -143,7 +143,8 @@ void sendSubscriberRegistration(char* topic){
     sendRegistration(topic);
 }
 
-void sendPublication(){
+void sendPublication(char* msg){
+    strcpy(msgToBroker.data.data, msg);
     msgToBroker.action = PUBLISH_DATA;
     trySendingMessage(msgToBroker);
 }
@@ -163,8 +164,8 @@ int acceptClient(){
 
 //CREACIÓN DE HILOS X PUB/SUB ENTRANTE - EN DESARROLLO
 void processNewRegistration(int clientSocket){
-    //int* pclient = malloc(sizeof(int));
-    //pclient = &clientSocket; // Asignar un ID único al cliente
+    int* pclient = malloc(sizeof(int));
+    pclient = &clientSocket; // Asignar un ID único al cliente
 
     // Crear un hilo para el cliente registrado
     if(registeredPublishers+1 > MAX_PUBLISHERS){
@@ -174,9 +175,9 @@ void processNewRegistration(int clientSocket){
     }
     else {
         int threadCreateResult = pthread_create(&publisherThreads[registeredPublishers], NULL,
-                                                (void *) registerPublisher, (void *) clientSocket);
+                                                (void *) registerPublisher, (void *) &pclient);
         if (threadCreateResult != 0) {
-            printf("Error creating thread for client %ls\n", clientSocket);
+            printf("Error creating thread for client %d\n", clientSocket);
         }
         pthread_join(publisherThreads[registeredPublishers], NULL);
         registeredPublishers++;
@@ -188,11 +189,10 @@ void* registerPublisher(int client) {
     resFromBroker.id = client;
 
     if ((recv(client, &requestedAction, sizeof(requestedAction),0)) < 0) {
-        printf("--------------------if---------------------\n");
+        printf("1----------------------if---------------------------\n");
         resFromBroker.response_status = _ERROR;
     } else {
-
-        printf("--------------------else---------------------\n");
+        printf("1----------------------else---------------------------\n");
         struct timespec time_ex;
 
         clock_gettime(CLOCK_REALTIME, &time_ex);
@@ -207,6 +207,7 @@ void* registerPublisher(int client) {
     }
 
     if( send(client , &resFromBroker , sizeof(resFromBroker) , 0) < 0){
+        printf("2----------------------if---------------------------\n");
         printf("Send failed from broker\n");
         exit(EXIT_FAILURE);
     }
@@ -217,8 +218,6 @@ void* registerPublisher(int client) {
             printf("Publicamos.");
         }
     }while(requestedAction.action != UNREGISTER_PUBLISHER);
-
-    printf("----------------------free-------------------\n");
 
     //free(client);
     pthread_exit(0);

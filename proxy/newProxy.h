@@ -61,6 +61,7 @@ void *registerPublisher(int client);
 void serverClosing();
 void setPort(unsigned int port);
 void setIpPort(char* ip, unsigned int port);
+void sendPublication(char* msg);
 //void * socketThread(void *fd);
 
 
