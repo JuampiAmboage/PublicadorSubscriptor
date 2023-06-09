@@ -76,14 +76,11 @@ int main(int argc, char *argv[]) {
 
 
     while(1) {
-        sleep(2);
-
-        //Este metodo implica notificar al
-        //broker que se esta queriendo publicar con lo cual el broker se pone en modo
-        //"escuchar" para recibir el menaje y luego enviarlo
+        sleep(3);
         char msg = 'h';
         sendPublication(&msg);
     }
+
 
 
     return 0;

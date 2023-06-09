@@ -189,10 +189,8 @@ void processNewRegistration(int clientSocket){
 //FUNCIÓN DE EJECUCIÓN DE HILO PARA PUBLICADOR - EN DESAROLLO
 void *registerPublisher() {
     if ((recv(pub_fd, &requestedAction, sizeof(requestedAction),0)) < 0) {
-        printf("1----------------------if---------------------------\n");
         resFromBroker.response_status = _ERROR;
     } else {
-        printf("1----------------------else---------------------------\n");
         struct timespec time_ex;
 
         clock_gettime(CLOCK_REALTIME, &time_ex);
@@ -207,7 +205,6 @@ void *registerPublisher() {
     }
 
     if( send(pub_fd , &resFromBroker , sizeof(resFromBroker) , 0) < 0){
-        printf("2----------------------if---------------------------\n");
         printf("Send failed from broker\n");
         exit(EXIT_FAILURE);
     }
