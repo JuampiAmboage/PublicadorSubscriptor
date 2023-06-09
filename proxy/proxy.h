@@ -1,9 +1,6 @@
 #ifndef PUBLICADORSUBSCRIPTOR_PROXY_H
 #define PUBLICADORSUBSCRIPTOR_PROXY_H
 
-
-
-
 enum operations {
     REGISTER_PUBLISHER = 0,
     UNREGISTER_PUBLISHER,
@@ -27,7 +24,7 @@ struct message {
 };
 
 enum status {
-    ERROR = 0,
+    _ERROR = 0,
     LIMIT,
     OK
 };

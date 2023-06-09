@@ -1,22 +1,27 @@
+#ifdef __linux__
+#include <arpa/inet.h>
+#elif _WIN32
+#include <Winsock2.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-//#include <Winsock2.h>
+//#include <sys/socket.h>
+//#include <netinet/in.h>
 #include <string.h>
 #include <unistd.h>
 #include <signal.h>
-#include <arpa/inet.h>
 #include <errno.h>
 #include <pthread.h>
 
-#include "proxy/proxy.h"
+#include "proxy/newProxy.h"
+
 
 
 #include <getopt.h> //para getopt_long
 
-struct sockaddr_in getDetail(int client_or_server);
+struct sockaddr_in getServer(int client_or_server);
 
 int main(int argc, char *argv[]) {
     setbuf(stdout, NULL);
@@ -56,14 +61,26 @@ int main(int argc, char *argv[]) {
 
 
 
-    set_ip_port(ip,port);
+    setIpPort(ip,port);
     //estructura del tipo sockaddr para server, guarda info del server
     struct sockaddr_in server;
 
-    server = getDetail(0);
-    connect_client(server);
 
-    data_pub_message(topic);
+
+    server = getServer(0);
+    printf("---> TOPIC: %s\n",topic);
+
+    connectPublisher(server);
+    sendPublisherRegistration(topic);
+
+
+
+    while(1) {
+        sleep(3);
+        char msg = 'h';
+        sendPublication(&msg);
+    }
+
 
 
     return 0;

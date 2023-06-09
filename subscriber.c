@@ -1,23 +1,20 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-//#include <Winsock2.h>
-#include <string.h>
-#include <unistd.h>
-#include <signal.h>
+#ifdef __linux__
 #include <arpa/inet.h>
+#elif _WIN32
+#include <Winsock2.h>
+#endif
+
 #include <errno.h>
 #include <pthread.h>
-
-#include "proxy/proxy.h"
-
-
 #include <getopt.h> //para getopt_long
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "proxy/newProxy.h"
 
 
-struct sockaddr_in getDetail(int client_or_server);
+
+struct sockaddr_in getServer(int client_or_server);
 
 int main(int argc, char *argv[]) {
     setbuf(stdout, NULL);
@@ -25,9 +22,6 @@ int main(int argc, char *argv[]) {
     int opt= 0;
     int port;
     char *ip,*topic;
-
-    // create process
-    // Process subscriberProcess = initializeProcess();
 
     static struct option long_options[] = {
             {"ip",      required_argument,       0,  'a' },
@@ -54,16 +48,15 @@ int main(int argc, char *argv[]) {
                 exit(EXIT_FAILURE);
         }
     }
-    printf("%s\n",ip );
-    printf("%i\n",port );
-    printf("%s\n",topic );
 
-
-    set_ip_port(ip, port);
+    setIpPort(ip, port);
     struct sockaddr_in server;
 
-    server = getDetail(0);
-    connect_client(server);
+    server = getServer(0);
+    printf("---> TOPIC: %s\n",topic);
+
+    connectSubscriber(server);
+    registerSubscriber(topic);
 
     return 0;
 }
