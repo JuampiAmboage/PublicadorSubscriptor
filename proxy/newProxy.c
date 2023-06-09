@@ -38,6 +38,9 @@ int registeredSubscribers = 0;
 
 int fd_socket = 0, fd = 0, pub_fd = 0, sub_fd = 0;
 
+pthread_mutex_t mutex;
+pthread_cond_t cond;
+
 void setIpPort (char* ip, unsigned int port){
     info.ip_process = ip;
     info.port_process = port;
@@ -144,10 +147,20 @@ void sendSubscriberRegistration(char* topic){
     sendRegistration(topic);
 }
 
+void* threadPublication(){
+    pthread_mutex_lock(&mutex);
+    trySendingMessage(msgToBroker);
+    pthread_cond_signal(&cond);
+    pthread_mutex_unlock(&mutex);
+    pthread_exit(0);
+}
+
 void sendPublication(char* msg){
     strcpy(msgToBroker.data.data, msg);
     msgToBroker.action = PUBLISH_DATA;
-    trySendingMessage(msgToBroker);
+    pthread_t signalThread;
+    int threadCreateResult = pthread_create(&signalThread, NULL,
+                                            (void *) threadPublication, NULL);
 }
 
 //DAR ID AL CLIENTE EN SERVIDOR - LISTO
@@ -199,12 +212,14 @@ void processNewRegistration(int clientSocket){
 
 }
 
-pthread_mutex_t mutex;
-pthread_cond_t cond;
+void defineMutex(){
+    pthread_mutex_init(&mutex,NULL);
+    pthread_cond_init(&cond,NULL);
+}
 
-void defineMutex(pthread_mutex_t mutexx, pthread_cond_t condd){
-    mutex = mutexx;
-    cond = condd;
+void destroyMutex(){
+    pthread_mutex_destroy(&mutex);
+    pthread_cond_destroy(&cond);
 }
 
 //FUNCIÓN DE EJECUCIÓN DE HILO PARA PUBLICADOR - EN DESAROLLO
@@ -233,13 +248,22 @@ void *registerPublisher() {
     }
 
     do{
+        printf("1----------------------------------------\n");
+
         pthread_mutex_lock(&mutex);
         pthread_cond_wait(&cond, &mutex);
+        (recv(myId, &requestedAction, sizeof(requestedAction),0));
+
+        printf("2----------------------------------------\n");
 
         if (requestedAction.action == PUBLISH_DATA) {
-            printf(requestedAction.data.data);
+            printf("3----------------------------------------\n");
+            printf("%s", requestedAction.data.data);
             // Procesar la publicación recibida
         }
+
+        printf("4----------------------------------------\n");
+
         sleep(3);
         pthread_mutex_unlock(&mutex);
         pthread_cond_signal(&cond);
