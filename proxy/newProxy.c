@@ -167,6 +167,7 @@ void processNewRegistration(int clientSocket){
     int* pclient = malloc(sizeof(int));
     pclient = &clientSocket; // Asignar un ID único al cliente
     resFromBroker.id = clientSocket;
+    pthread_t hilo;
 
     // Crear un hilo para el cliente registrado
     if(registeredPublishers+1 > MAX_PUBLISHERS){
@@ -174,12 +175,12 @@ void processNewRegistration(int clientSocket){
         send(clientSocket , &resFromBroker , sizeof(resFromBroker) , 0);
     }
     else {
-        int threadCreateResult = pthread_create(&publisherThreads[registeredPublishers], NULL,
+        int threadCreateResult = pthread_create(&hilo, NULL,
                                                 (void *) registerPublisher, (void *) &pclient);
         if (threadCreateResult != 0) {
             printf("Error creating thread for client %d\n", clientSocket);
         }
-        pthread_join(publisherThreads[registeredPublishers], NULL);
+        pthread_join(hilo, NULL);
         registeredPublishers++;
     }
 }
@@ -210,12 +211,12 @@ void registerPublisher(int *client) {
         exit(EXIT_FAILURE);
     }
 
-    /*do{
+    do{
         recv(*client, &requestedAction, sizeof(requestedAction),0);
         if (requestedAction.action == PUBLISH_DATA){
             printf("Publicamos.");
         }
-    }while(requestedAction.action != UNREGISTER_PUBLISHER);*/
+    }while(requestedAction.action != UNREGISTER_PUBLISHER);
 
     //free(client);
     pthread_exit(0);
