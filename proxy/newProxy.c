@@ -28,7 +28,7 @@ struct message msgToBroker;
 struct message requestedAction;
 struct response resFromBroker;
 
-
+int receivedPublication = 0;
 
 pthread_t publisherThreads[MAX_PUBLISHERS];
 int registeredPublishers = 0;
@@ -248,25 +248,21 @@ void *registerPublisher() {
     }
 
     do{
-        printf("1----------------------------------------\n");
-
         pthread_mutex_lock(&mutex);
-        pthread_cond_wait(&cond, &mutex);
-        (recv(myId, &requestedAction, sizeof(requestedAction),0));
+        while(!receivedPublication){
+            pthread_cond_wait(&cond, &mutex);
+        }
+        receivedPublication = 0;  // Reiniciar la bandera
 
-        printf("2----------------------------------------\n");
+        //recv(myId, &requestedAction, sizeof(requestedAction),0);
+
 
         if (requestedAction.action == PUBLISH_DATA) {
-            printf("3----------------------------------------\n");
             printf("%s", requestedAction.data.data);
             // Procesar la publicación recibida
         }
 
-        printf("4----------------------------------------\n");
-
-        sleep(3);
         pthread_mutex_unlock(&mutex);
-        pthread_cond_signal(&cond);
 
     }while(requestedAction.action != UNREGISTER_PUBLISHER);
     //free(client);
