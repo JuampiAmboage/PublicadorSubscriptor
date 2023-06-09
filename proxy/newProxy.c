@@ -24,10 +24,16 @@
 struct ip_port info;
 
 struct message msgToBroker;
-struct message regPublisher;
 struct message requestedAction;
-
 struct response resFromBroker;
+
+pthread_mutex_t mutex;
+
+pthread_t publisherThreads[MAX_PUBLISHERS];
+int registeredPublishers = 0;
+
+pthread_t subscribersThreads[MAX_SUBSCRIBERS];
+int registeredSubscribers = 0;
 
 int fd_socket = 0, fd = 0, pub_fd = 0, sub_fd = 0;
 
@@ -86,7 +92,7 @@ void trySendingMessage(struct message toSend){
         exit(EXIT_FAILURE);
     }
     else
-        printf("Message for registration succesfully send\n");
+        printf("Message succesfully send\n");
 }
 //CONEXIÓN DE USO COMÚN PARA PUBLICADOR Y SUBSCRIPTOR - LISTO
 struct timespec connectClient(struct sockaddr_in server) {
@@ -137,6 +143,11 @@ void sendSubscriberRegistration(char* topic){
     sendRegistration(topic);
 }
 
+void sendPublication(){
+    msgToBroker.action = PUBLISH_DATA;
+    trySendingMessage(msgToBroker);
+}
+
 //DAR ID AL CLIENTE EN SERVIDOR - LISTO
 int acceptClient(){
     int clientSocket = accept(fd_socket, (struct sockaddr*)NULL, NULL);
@@ -152,28 +163,31 @@ int acceptClient(){
 
 //CREACIÓN DE HILOS X PUB/SUB ENTRANTE - EN DESARROLLO
 void processNewRegistration(int clientSocket){
-    int* pclient = malloc(sizeof(int));
-    pclient = &clientSocket; // Asignar un ID único al cliente
+    //int* pclient = malloc(sizeof(int));
+    //pclient = &clientSocket; // Asignar un ID único al cliente
 
     // Crear un hilo para el cliente registrado
-    pthread_t thread;
-    int threadCreateResult;
-
-    threadCreateResult = pthread_create(&thread, NULL, (void*)registerPublisher, (void*)pclient);
-
-    if (threadCreateResult != 0) {
-        printf("Error creating thread for client %ls\n", pclient);
-        free(pclient);
+    if(registeredPublishers+1 > MAX_PUBLISHERS){
+        resFromBroker.id = clientSocket;
+        resFromBroker.response_status = LIMIT;
+        send(clientSocket , &resFromBroker , sizeof(resFromBroker) , 0);
     }
-
-    pthread_join(thread,NULL);
+    else {
+        int threadCreateResult = pthread_create(&publisherThreads[registeredPublishers], NULL,
+                                                (void *) registerPublisher, (void *) clientSocket);
+        if (threadCreateResult != 0) {
+            printf("Error creating thread for client %ls\n", clientSocket);
+        }
+        pthread_join(publisherThreads[registeredPublishers], NULL);
+        registeredPublishers++;
+    }
 }
 
 //FUNCIÓN DE EJECUCIÓN DE HILO PARA PUBLICADOR - EN DESAROLLO
-void registerPublisher(char* client) {
-    resFromBroker.id = *client;
+void* registerPublisher(int client) {
+    resFromBroker.id = client;
 
-    if ((recv(*client, &requestedAction, sizeof(requestedAction),0)) < 0) {
+    if ((recv(client, &requestedAction, sizeof(requestedAction),0)) < 0) {
         printf("--------------------if---------------------\n");
         resFromBroker.response_status = _ERROR;
     } else {
@@ -192,15 +206,22 @@ void registerPublisher(char* client) {
 
     }
 
-    if( send(*client , &resFromBroker , sizeof(resFromBroker) , 0) < 0){
-        printf("Send failed\n");
+    if( send(client , &resFromBroker , sizeof(resFromBroker) , 0) < 0){
+        printf("Send failed from broker\n");
         exit(EXIT_FAILURE);
     }
+
+    do{
+        recv(client, &requestedAction, sizeof(requestedAction),0);
+        if (requestedAction.action == PUBLISH_DATA){
+            printf("Publicamos.");
+        }
+    }while(requestedAction.action != UNREGISTER_PUBLISHER);
 
     printf("----------------------free-------------------\n");
 
     //free(client);
-    pthread_exit(NULL);
+    pthread_exit(0);
 }
 
 //CONECTARSE AL SERVIDOR - LISTO
