@@ -14,6 +14,7 @@
 #include <signal.h>
 #include <errno.h>
 #include <pthread.h>
+#include <signal.h>
 
 #include "proxy/newProxy.h"
 
@@ -21,9 +22,12 @@
 
 #include <getopt.h> //para getopt_long
 
+volatile sig_atomic_t terminated = 0;
+
 struct sockaddr_in getServer(int client_or_server);
 
 int main(int argc, char *argv[]) {
+    signal(SIGINT, handlePublisherSignal(terminated));
     setbuf(stdout, NULL);
 
     int opt= 0;
@@ -75,14 +79,14 @@ int main(int argc, char *argv[]) {
 
 
 
-    while(1) {
+    while(!terminated) {
         sleep(3);
         char msg = 'h';
         sendPublication(&msg);
     }
 
 
-
+    printf("CHAU");
     return 0;
 }
 

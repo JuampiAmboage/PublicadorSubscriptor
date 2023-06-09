@@ -24,6 +24,7 @@
 
 struct ip_port info;
 
+struct timespec expectedTime;
 struct message msgToBroker;
 struct message requestedAction;
 struct response resFromBroker;
@@ -93,6 +94,9 @@ void tryServerConnection(struct sockaddr_in server){
 }
 
 void trySendingMessage(struct message toSend) {
+    clock_gettime( CLOCK_REALTIME , &expectedTime);
+    double pub_t = expectedTime.tv_nsec;
+
     if (send(fd_socket, &toSend, sizeof(toSend), 0) < 0) {
         printf("Send failed\n");
         exit(EXIT_FAILURE);
@@ -101,8 +105,7 @@ void trySendingMessage(struct message toSend) {
     }
 }
 //CONEXIÓN DE USO COMÚN PARA PUBLICADOR Y SUBSCRIPTOR - LISTO
-struct timespec connectClient(struct sockaddr_in server) {
-    struct timespec expectedTime;
+void connectClient(struct sockaddr_in server) {
     clock_gettime( CLOCK_REALTIME , &expectedTime);
     double pub_t = expectedTime.tv_nsec;
 
@@ -111,20 +114,18 @@ struct timespec connectClient(struct sockaddr_in server) {
 }
 //CONECTARSE COMO PUBLICADOR - LISTO
 void connectPublisher(struct sockaddr_in server){
-    struct timespec expectedTime = connectClient(server);
+    connectClient(server);
     printf("[%ld.%ld] Publisher conectado con el broker correctamente.\n",expectedTime.tv_sec,expectedTime.tv_nsec);
 }
 
 //CONECTARSE COMO SUBSCRIPTOR - LISTO
 void connectSubscriber(struct sockaddr_in server){
-    struct timespec expectedTime = connectClient(server);
+    connectClient(server);
     printf("[%ld.%ld] Suscriptor conectado con el broker correctamente.\n",expectedTime.tv_sec,expectedTime.tv_nsec);
 }
 
 void sendRegistration(char* topic){
     struct timespec expectedTime;
-    clock_gettime( CLOCK_REALTIME , &expectedTime);
-    double pub_t = expectedTime.tv_nsec;
 
     strcpy(msgToBroker.topic, topic);
 
@@ -148,29 +149,10 @@ void sendSubscriberRegistration(char* topic){
     sendRegistration(topic);
 }
 
-void* threadPublication(){
-    pthread_mutex_lock(&mutex);
-    trySendingMessage(msgToBroker);
-    pthread_cond_signal(&cond);
-
-    signalMessage.signalType = 1;
-    send(fd_socket, &signalMessage, sizeof(signalMessage), 0);
-
-    if (recv(fd_socket, &receivedSignal, sizeof(receivedSignal), 0)) {
-        signalMessage.signalType = 0;
-        send(fd_socket, &signalMessage, sizeof(signalMessage), 0);
-    }
-    pthread_mutex_unlock(&mutex);
-    pthread_exit(0);
-}
-
 void sendPublication(char* msg){
     strcpy(msgToBroker.data.data, msg);
     msgToBroker.action = PUBLISH_DATA;
-    pthread_t signalThread;
-    int threadCreateResult = pthread_create(&signalThread, NULL,
-                                            (void *) threadPublication, NULL);
-
+    trySendingMessage(msgToBroker);
 }
 
 //DAR ID AL CLIENTE EN SERVIDOR - LISTO
@@ -189,13 +171,9 @@ int acceptClient(){
 int cantHilos = 0;
 //CREACIÓN DE HILOS X PUB/SUB ENTRANTE - EN DESARROLLO
 void processNewRegistration(int clientSocket){
-
-    //int* pclient = malloc(sizeof(int));
-    //pclient = &clientSocket; // Asignar un ID único al cliente
     pub_fd = clientSocket;
     resFromBroker.id = clientSocket;
     pthread_t hilo1;
-
     pthread_t hilo2;
 
     // Crear un hilo para el cliente registrado
@@ -216,7 +194,6 @@ void processNewRegistration(int clientSocket){
         if (threadCreateResult != 0) {
             printf("Error creating thread for client %d\n", clientSocket);
         }
-        pthread_join(hilo, NULL);
         registeredPublishers++;
     }
 
@@ -236,6 +213,7 @@ void destroyMutex(){
 void *registerPublisher() {
     int myId = pub_fd;
 
+    pthread_mutex_lock(&mutex);
     if ((recv(myId, &requestedAction, sizeof(requestedAction),0)) < 0) {
         resFromBroker.response_status = _ERROR;
     } else {
@@ -249,8 +227,8 @@ void *registerPublisher() {
 
         printf("ID: %d\n",resFromBroker.id );
         printf("STATUS: %d\n",resFromBroker.response_status);
-
     }
+    pthread_mutex_unlock(&mutex);
 
     if( send(myId , &resFromBroker , sizeof(resFromBroker) , 0) < 0){
         printf("Send failed from broker\n");
@@ -260,16 +238,13 @@ void *registerPublisher() {
     do{
         pthread_mutex_lock(&mutex);
 
-        if (recv(myId, &receivedSignal, sizeof(receivedSignal), 0)) {
-            printf("-----\n");
-            signalMessage.signalType = 0;
-            send(myId , &signalMessage , sizeof(signalMessage) , 0);
-        }
+        recv(myId, &requestedAction, sizeof(receivedSignal), 0);
+        if (requestedAction.action == PUBLISH_DATA)
+            printf("PUBLICANDO: %d\n",requestedAction.data.data);
 
         pthread_mutex_unlock(&mutex);
 
     }while(requestedAction.action != UNREGISTER_PUBLISHER);
-    //free(client);
     pthread_exit(0);
 }
 
@@ -313,6 +288,14 @@ void connectServer(struct sockaddr_in server){
     else{
         printf("Server listening...\n");
     }
+}
+
+void * handlePublisherSignal(volatile sig_atomic_t flag){
+    flag = 1;
+    msgToBroker.action = UNREGISTER_PUBLISHER;
+    trySendingMessage(msgToBroker);
+    printf("[%ld.%ld] De-Registrado correctamente del broker.\n",expectedTime.tv_sec,expectedTime.tv_nsec);
+    //falta id
 }
 
 void serverClosing(){

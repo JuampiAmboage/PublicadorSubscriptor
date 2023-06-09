@@ -55,7 +55,7 @@ struct sockaddr_in getServer(int client_or_server);
 void trySocketCreation();
 void tryServerConnection(struct sockaddr_in server);
 void trySendingMessage(struct message toSend);
-struct timespec connectClient(struct sockaddr_in server);
+void connectClient(struct sockaddr_in server);
 void connectPublisher(struct sockaddr_in server);
 void connectSubscriber(struct sockaddr_in server);
 void connectServer(struct sockaddr_in server);
@@ -71,6 +71,7 @@ void setIpPort(char* ip, unsigned int port);
 void sendPublication(char* msg);
 //void * socketThread(void *fd);
 
+void * handlePublisherSignal(volatile sig_atomic_t flag);
 void server_closing();
 void clients_closing();
 void defineMutex();
