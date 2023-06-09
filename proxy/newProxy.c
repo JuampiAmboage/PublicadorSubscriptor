@@ -210,12 +210,12 @@ void registerPublisher(int *client) {
         exit(EXIT_FAILURE);
     }
 
-    do{
+    /*do{
         recv(*client, &requestedAction, sizeof(requestedAction),0);
         if (requestedAction.action == PUBLISH_DATA){
             printf("Publicamos.");
         }
-    }while(requestedAction.action != UNREGISTER_PUBLISHER);
+    }while(requestedAction.action != UNREGISTER_PUBLISHER);*/
 
     //free(client);
     pthread_exit(0);
