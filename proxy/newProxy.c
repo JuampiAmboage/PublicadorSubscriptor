@@ -166,10 +166,10 @@ int acceptClient(){
 void processNewRegistration(int clientSocket){
     int* pclient = malloc(sizeof(int));
     pclient = &clientSocket; // Asignar un ID único al cliente
+    resFromBroker.id = clientSocket;
 
     // Crear un hilo para el cliente registrado
     if(registeredPublishers+1 > MAX_PUBLISHERS){
-        resFromBroker.id = clientSocket;
         resFromBroker.response_status = LIMIT;
         send(clientSocket , &resFromBroker , sizeof(resFromBroker) , 0);
     }
@@ -185,10 +185,8 @@ void processNewRegistration(int clientSocket){
 }
 
 //FUNCIÓN DE EJECUCIÓN DE HILO PARA PUBLICADOR - EN DESAROLLO
-void* registerPublisher(int client) {
-    resFromBroker.id = client;
-
-    if ((recv(client, &requestedAction, sizeof(requestedAction),0)) < 0) {
+void registerPublisher(int *client) {
+    if ((recv(*client, &requestedAction, sizeof(requestedAction),0)) < 0) {
         printf("1----------------------if---------------------------\n");
         resFromBroker.response_status = _ERROR;
     } else {
@@ -206,14 +204,14 @@ void* registerPublisher(int client) {
 
     }
 
-    if( send(client , &resFromBroker , sizeof(resFromBroker) , 0) < 0){
+    if( send(*client , &resFromBroker , sizeof(resFromBroker) , 0) < 0){
         printf("2----------------------if---------------------------\n");
         printf("Send failed from broker\n");
         exit(EXIT_FAILURE);
     }
 
     do{
-        recv(client, &requestedAction, sizeof(requestedAction),0);
+        recv(*client, &requestedAction, sizeof(requestedAction),0);
         if (requestedAction.action == PUBLISH_DATA){
             printf("Publicamos.");
         }
