@@ -93,11 +93,11 @@ void tryServerConnection(struct sockaddr_in server){
     }
 }
 
-void trySendingMessage(struct message toSend) {
+void trySendingMessage() {
     clock_gettime( CLOCK_REALTIME , &expectedTime);
     double pub_t = expectedTime.tv_nsec;
 
-    if (send(fd_socket, &toSend, sizeof(toSend), 0) < 0) {
+    if (send(fd_socket, &msgToBroker, sizeof(msgToBroker), 0) < 0) {
         printf("Send failed\n");
         exit(EXIT_FAILURE);
     } else {
@@ -125,14 +125,12 @@ void connectSubscriber(struct sockaddr_in server){
 }
 
 void sendRegistration(char* topic){
-    struct timespec expectedTime;
-
     strcpy(msgToBroker.topic, topic);
 
-    trySendingMessage(msgToBroker);
+    trySendingMessage();
 
     if(recv(fd_socket , &resFromBroker , sizeof(resFromBroker) , 0) < 0){
-        printf("Send failed\n");
+        printf("Reception failed\n");
         exit(EXIT_FAILURE);
     }
 
@@ -152,7 +150,7 @@ void sendSubscriberRegistration(char* topic){
 void sendPublication(char* msg){
     strcpy(msgToBroker.data.data, msg);
     msgToBroker.action = PUBLISH_DATA;
-    trySendingMessage(msgToBroker);
+    trySendingMessage();
 }
 
 //DAR ID AL CLIENTE EN SERVIDOR - LISTO
@@ -238,7 +236,7 @@ void *registerPublisher() {
     do{
         pthread_mutex_lock(&mutex);
 
-        recv(myId, &requestedAction, sizeof(receivedSignal), 0);
+        recv(myId, &requestedAction, sizeof(requestedAction), 0);
         if (requestedAction.action == PUBLISH_DATA)
             printf("PUBLICANDO: %d\n",requestedAction.data.data);
 
@@ -293,7 +291,7 @@ void connectServer(struct sockaddr_in server){
 void * handlePublisherSignal(volatile sig_atomic_t flag){
     flag = 1;
     msgToBroker.action = UNREGISTER_PUBLISHER;
-    trySendingMessage(msgToBroker);
+    trySendingMessage();
     printf("[%ld.%ld] De-Registrado correctamente del broker.\n",expectedTime.tv_sec,expectedTime.tv_nsec);
     //falta id
 }

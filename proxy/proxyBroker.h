@@ -1,3 +1,9 @@
+//
+// Created by juamp on 9/6/2023.
+//
+
+#ifndef PUBLICADORSUBSCRIPTOR_PROXYBROKER_H
+#define PUBLICADORSUBSCRIPTOR_PROXYBROKER_H
 
 
 #ifndef PUBLICADORSUBSCRIPTOR_NEWPROXY_H
@@ -52,26 +58,15 @@ struct receivedSignal {
 };
 
 struct sockaddr_in getServer(int client_or_server);
-void trySocketCreation();
-void tryServerConnection(struct sockaddr_in server);
-void trySendingMessage();
-void connectClient(struct sockaddr_in server);
-void connectPublisher(struct sockaddr_in server);
-void connectSubscriber(struct sockaddr_in server);
+
 void connectServer(struct sockaddr_in server);
-void sendRegistration(char* topic);
-void sendPublisherRegistration(char* topic);
-void sendSubscriberRegistration(char* topic);
 int acceptClient();
 void processNewRegistration(int clientSocket);
 void* registerPublisher();
 void serverClosing();
 void setPort(unsigned int port);
-void setIpPort(char* ip, unsigned int port);
-void sendPublication(char* msg);
-//void * socketThread(void *fd);
+void setIpPort(char* ip, unsigned int port);;
 
-void * handlePublisherSignal(volatile sig_atomic_t flag);
 void server_closing();
 void clients_closing();
 void defineMutex();
@@ -80,3 +75,7 @@ void destroyMutex();
 void* threadPublication();
 
 #endif //PUBLICADORSUBSCRIPTOR_NEWPROXY_H
+
+
+
+#endif //PUBLICADORSUBSCRIPTOR_PROXYBROKER_H

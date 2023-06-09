@@ -1,10 +1,10 @@
 
-
-#ifndef PUBLICADORSUBSCRIPTOR_NEWPROXY_H
-#define PUBLICADORSUBSCRIPTOR_NEWPROXY_H
-
+#ifndef PUBLICADORSUBSCRIPTOR_PROXYPUBSUB_H
+#define PUBLICADORSUBSCRIPTOR_PROXYPUBSUB_H
 
 #include <stdbool.h>
+#include <sys/timeb.h>
+#include <signal.h>
 
 enum operations {
     REGISTER_PUBLISHER = 0,
@@ -62,21 +62,10 @@ void connectServer(struct sockaddr_in server);
 void sendRegistration(char* topic);
 void sendPublisherRegistration(char* topic);
 void sendSubscriberRegistration(char* topic);
-int acceptClient();
-void processNewRegistration(int clientSocket);
-void* registerPublisher();
 void serverClosing();
-void setPort(unsigned int port);
 void setIpPort(char* ip, unsigned int port);
 void sendPublication(char* msg);
-//void * socketThread(void *fd);
 
 void * handlePublisherSignal(volatile sig_atomic_t flag);
-void server_closing();
-void clients_closing();
-void defineMutex();
-void destroyMutex();
 
-void* threadPublication();
-
-#endif //PUBLICADORSUBSCRIPTOR_NEWPROXY_H
+#endif //PUBLICADORSUBSCRIPTOR_PROXYPUBSUB_H
