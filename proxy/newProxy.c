@@ -163,6 +163,7 @@ int acceptClient(){
 }
 
 int cantHilos = 0;
+
 //CREACIÓN DE HILOS X PUB/SUB ENTRANTE - EN DESARROLLO
 void processNewRegistration(int clientSocket){
     pub_fd = clientSocket;
@@ -211,12 +212,10 @@ void *registerPublisher() {
     if ((recv(myId, &requestedAction, sizeof(requestedAction),0)) < 0) {
         resFromBroker.response_status = _ERROR;
     } else {
-        struct timespec time_ex;
+        clock_gettime(CLOCK_REALTIME, &expectedTime);
+        double pub_t = expectedTime.tv_nsec;
 
-        clock_gettime(CLOCK_REALTIME, &time_ex);
-        double pub_t = time_ex.tv_nsec;
-
-        printf("[%ld.%ld] Nuevo cliente (%d) Publicador conectado : %s \n",time_ex.tv_sec,time_ex.tv_nsec,pub_fd ,requestedAction.topic );
+        printf("[%ld.%ld] Nuevo cliente (%d) Publicador conectado : %s \n",expectedTime.tv_sec,expectedTime.tv_nsec,pub_fd ,requestedAction.topic );
         resFromBroker.response_status = OK;
 
         printf("ID: %d\n",resFromBroker.id );
@@ -295,7 +294,72 @@ void * handlePublisherSignal(volatile sig_atomic_t flag){
 void serverClosing(){
     close(fd_socket);
 }
-
 void clients_closing(){
     close(fd_socket);
 }
+
+//REESTRUCTURACION
+
+void *publisherThread(int clientSocket){
+    int myId = clientSocket;
+    while(requestedAction.action != UNREGISTER_PUBLISHER){
+        pthread_mutex_lock(&mutex);
+
+        recv(myId, &requestedAction, sizeof(requestedAction), 0);
+        if (requestedAction.action == PUBLISH_DATA)
+            printf("PUBLICANDO: %s\n",requestedAction.data.data);
+
+        pthread_mutex_unlock(&mutex);
+
+    }
+    //reorganize() ->reorganizamos el vector de publishers liberando el index
+    pthread_exit(0);
+
+}
+
+void processNewPublisher(){
+    if(registeredPublishers+1 > MAX_PUBLISHERS){
+        resFromBroker.response_status = LIMIT;
+        resFromBroker.id = -1;
+    }
+    else{
+        int threadCreateResult = pthread_create(&publisherThreads[registeredPublishers], NULL,
+                                                (void *) publisherThread, NULL);
+        if (threadCreateResult != 0) {
+            printf("Error creating thread for client %d\n", pub_fd);
+        }
+        else{
+            clock_gettime(CLOCK_REALTIME, &expectedTime);
+            double pub_t = expectedTime.tv_nsec;
+
+            printf("[%ld.%ld] Nuevo cliente (%d) Publicador conectado : %s \n",expectedTime.tv_sec,expectedTime.tv_nsec,pub_fd ,requestedAction.topic );
+            resFromBroker.response_status = OK;
+            resFromBroker.id = pub_fd;
+
+            printf("ID: %d\n",resFromBroker.id );
+            printf("STATUS: %d\n",resFromBroker.response_status);
+            registeredPublishers++;
+        }
+    }
+}
+
+void newprocessNewRegistration(){
+    pthread_mutex_lock(&mutex);
+    if ((recv(pub_fd, &requestedAction, sizeof(requestedAction),0)) < 0) {
+        resFromBroker.response_status = _ERROR;
+    }
+    else{
+        if(requestedAction.action == REGISTER_PUBLISHER){
+            processNewPublisher();
+        }
+        else if(requestedAction.action == REGISTER_SUBSCRIBER){
+            //processNewSubscriber(clientSocket);
+        }
+    }
+    pthread_mutex_unlock(&mutex);
+    if( send(pub_fd , &resFromBroker , sizeof(resFromBroker) , 0) < 0){
+        printf("Send failed from broker\n");
+        exit(EXIT_FAILURE);
+    }
+}
+
