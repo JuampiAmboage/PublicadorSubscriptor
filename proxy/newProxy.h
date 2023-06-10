@@ -54,8 +54,8 @@ struct receivedSignal {
 struct sockaddr_in getServer(int client_or_server);
 void trySocketCreation();
 void tryServerConnection(struct sockaddr_in server);
-void trySendingMessage();
-void connectClient(struct sockaddr_in server);
+struct timespec trySendingMessage();
+struct timespec connectClient(struct sockaddr_in server);
 void connectPublisher(struct sockaddr_in server);
 void connectSubscriber(struct sockaddr_in server);
 void connectServer(struct sockaddr_in server);

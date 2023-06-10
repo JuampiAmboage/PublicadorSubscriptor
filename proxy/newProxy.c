@@ -23,7 +23,6 @@
 #define SIZE_BUFFER 6000
 
 struct ip_port info;
-struct timespec expectedTime;
 struct message msgToBroker;
 struct message requestedAction;
 struct response resFromBroker;
@@ -92,9 +91,10 @@ void tryServerConnection(struct sockaddr_in server){
     }
 }
 
-void trySendingMessage() {
-    clock_gettime( CLOCK_REALTIME , &expectedTime);
-    double pub_t = expectedTime.tv_nsec;
+struct timespec trySendingMessage() {
+    struct timespec time_ex;
+    clock_gettime( CLOCK_REALTIME , &time_ex);
+    double pub_t = time_ex.tv_nsec;
 
     if (send(fd_socket, &msgToBroker, sizeof(msgToBroker), 0) < 0) {
         printf("Send failed\n");
@@ -104,33 +104,37 @@ void trySendingMessage() {
     }
 }
 //CONEXIÓN DE USO COMÚN PARA PUBLICADOR Y SUBSCRIPTOR - LISTO
-void connectClient(struct sockaddr_in server) {
+struct timespec connectClient(struct sockaddr_in server) {
+    struct timespec time_ex;
+    clock_gettime( CLOCK_REALTIME , &time_ex);
+    double pub_t = time_ex.tv_nsec;
     trySocketCreation();
     tryServerConnection(server);
+    return time_ex;
 }
 //CONECTARSE COMO PUBLICADOR - LISTO
 void connectPublisher(struct sockaddr_in server){
-    connectClient(server);
-    printf("[%ld.%ld] Publisher conectado con el broker correctamente.\n",expectedTime.tv_sec,expectedTime.tv_nsec);
+    struct timespec time_ex = connectClient(server);
+    printf("[%ld.%ld] Publisher conectado con el broker correctamente.\n",time_ex.tv_sec,time_ex.tv_nsec);
 }
 
 //CONECTARSE COMO SUBSCRIPTOR - LISTO
 void connectSubscriber(struct sockaddr_in server){
-    connectClient(server);
-    printf("[%ld.%ld] Suscriptor conectado con el broker correctamente.\n",expectedTime.tv_sec,expectedTime.tv_nsec);
+    struct timespec time_ex = connectClient(server);
+    printf("[%ld.%ld] Suscriptor conectado con el broker correctamente.\n",time_ex.tv_sec,time_ex.tv_nsec);
 }
 
 void sendRegistration(char* topic){
     strcpy(msgToBroker.topic, topic);
 
-    trySendingMessage();
+    struct timespec time_ex = trySendingMessage();
 
     if(recv(fd_socket , &resFromBroker , sizeof(resFromBroker) , 0) < 0){
         printf("Reception failed\n");
         exit(EXIT_FAILURE);
     }
 
-    printf("[%ld.%ld] Registrado correctamente con ID: %d para topic %s\n",expectedTime.tv_sec,expectedTime.tv_nsec,resFromBroker.id,msgToBroker.topic );
+    printf("[%ld.%ld] Registrado correctamente con ID: %d para topic %s\n",time_ex.tv_sec,time_ex.tv_nsec,resFromBroker.id,msgToBroker.topic );
 }
 
 void sendPublisherRegistration(char* topic){
@@ -212,10 +216,11 @@ void *registerPublisher() {
     if ((recv(myId, &requestedAction, sizeof(requestedAction),0)) < 0) {
         resFromBroker.response_status = _ERROR;
     } else {
-        clock_gettime(CLOCK_REALTIME, &expectedTime);
-        double pub_t = expectedTime.tv_nsec;
+        struct timespec time_ex;
+        clock_gettime(CLOCK_REALTIME, &time_ex);
+        double pub_t = time_ex.tv_nsec;
 
-        printf("[%ld.%ld] Nuevo cliente (%d) Publicador conectado : %s \n",expectedTime.tv_sec,expectedTime.tv_nsec,pub_fd ,requestedAction.topic );
+        printf("[%ld.%ld] Nuevo cliente (%d) Publicador conectado : %s \n",time_ex.tv_sec,time_ex.tv_nsec,pub_fd ,requestedAction.topic );
         resFromBroker.response_status = OK;
 
         printf("ID: %d\n",resFromBroker.id );
@@ -286,8 +291,8 @@ void connectServer(struct sockaddr_in server){
 void * handlePublisherSignal(volatile sig_atomic_t flag){
     flag = 1;
     msgToBroker.action = UNREGISTER_PUBLISHER;
-    trySendingMessage();
-    printf("[%ld.%ld] De-Registrado correctamente del broker.\n",expectedTime.tv_sec,expectedTime.tv_nsec);
+    struct timespec time_ex = trySendingMessage();
+    printf("[%ld.%ld] De-Registrado correctamente del broker.\n",time_ex.tv_sec,time_ex.tv_nsec);
     //falta id
 }
 
@@ -300,8 +305,8 @@ void clients_closing(){
 
 //REESTRUCTURACION
 
-void *publisherThread(int clientSocket){
-    int myId = clientSocket;
+void *publisherThread(){
+    int myId = pub_fd;
     while(requestedAction.action != UNREGISTER_PUBLISHER){
         pthread_mutex_lock(&mutex);
 
@@ -329,10 +334,11 @@ void processNewPublisher(){
             printf("Error creating thread for client %d\n", pub_fd);
         }
         else{
-            clock_gettime(CLOCK_REALTIME, &expectedTime);
-            double pub_t = expectedTime.tv_nsec;
+            struct timespec time_ex;
+            clock_gettime(CLOCK_REALTIME, &time_ex);
+            double pub_t = time_ex.tv_nsec;
 
-            printf("[%ld.%ld] Nuevo cliente (%d) Publicador conectado : %s \n",expectedTime.tv_sec,expectedTime.tv_nsec,pub_fd ,requestedAction.topic );
+            printf("[%ld.%ld] Nuevo cliente (%d) Publicador conectado : %s \n",time_ex.tv_sec,time_ex.tv_nsec,pub_fd ,requestedAction.topic );
             resFromBroker.response_status = OK;
             resFromBroker.id = pub_fd;
 
@@ -347,6 +353,7 @@ void newprocessNewRegistration(){
     pthread_mutex_lock(&mutex);
     if ((recv(pub_fd, &requestedAction, sizeof(requestedAction),0)) < 0) {
         resFromBroker.response_status = _ERROR;
+        resFromBroker.id = -1;
     }
     else{
         if(requestedAction.action == REGISTER_PUBLISHER){
