@@ -71,7 +71,7 @@ void setIpPort(char* ip, unsigned int port);
 void sendPublication(char* msg);
 //void * socketThread(void *fd);
 
-void * handlePublisherSignal(volatile sig_atomic_t flag);
+__sighandler_t handlePublisherSignal(volatile sig_atomic_t flag);
 void server_closing();
 void clients_closing();
 void defineMutex();

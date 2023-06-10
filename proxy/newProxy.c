@@ -288,11 +288,16 @@ void connectServer(struct sockaddr_in server){
     }
 }
 
-void * handlePublisherSignal(volatile sig_atomic_t flag){
+__sighandler_t handlePublisherSignal(volatile sig_atomic_t flag){
+
+    signal(flag, SIG_IGN);
+
     flag = 1;
     msgToBroker.action = UNREGISTER_PUBLISHER;
     struct timespec time_ex = trySendingMessage();
     printf("[%ld.%ld] De-Registrado correctamente del broker.\n",time_ex.tv_sec,time_ex.tv_nsec);
+
+    exit(SIGINT);
     //falta id
 }
 

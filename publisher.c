@@ -22,12 +22,12 @@
 
 #include <getopt.h> //para getopt_long
 
-volatile sig_atomic_t terminated = 0;
+static volatile __sighandler_t terminated = 0;
 
 struct sockaddr_in getServer(int client_or_server);
 
 int main(int argc, char *argv[]) {
-    signal(SIGINT, handlePublisherSignal(terminated));
+    //signal(SIGINT, handlePublisherSignal);
     setbuf(stdout, NULL);
 
     int opt= 0;
@@ -63,8 +63,6 @@ int main(int argc, char *argv[]) {
         }
     }
 
-
-
     setIpPort(ip,port);
     //estructura del tipo sockaddr para server, guarda info del server
     struct sockaddr_in server;
@@ -77,14 +75,11 @@ int main(int argc, char *argv[]) {
     connectPublisher(server);
     sendPublisherRegistration(topic);
 
-
-
     while(!terminated) {
         sleep(3);
         char msg = 'h';
         sendPublication(&msg);
     }
-
 
     printf("CHAU");
     return 0;
