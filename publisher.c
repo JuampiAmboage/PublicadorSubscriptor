@@ -81,7 +81,7 @@ int main(int argc, char *argv[]) {
 
     while(!terminated) {
         sleep(3);
-        char msg = 'h';
+        char msg = 'Hola, soy Diego Sanchez desde la terraza de FIUBA';
         sendPublication(&msg);
     }
 

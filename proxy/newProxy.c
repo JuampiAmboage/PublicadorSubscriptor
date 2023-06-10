@@ -315,7 +315,6 @@ void *publisherThread(){
             printf("PUBLICANDO: %s\n",requestedAction.data.data);
 
         pthread_mutex_unlock(&mutex);
-
     }
     //reorganize() ->reorganizamos el vector de publishers liberando el index
     pthread_exit(0);
@@ -349,7 +348,35 @@ void processNewPublisher(){
     }
 }
 
-void newprocessNewRegistration(){
+void processNewSubscriber(){
+    if(registeredSubscribers+1 > MAX_SUBSCRIBERS){
+        resFromBroker.response_status = LIMIT;
+        resFromBroker.id = -1;
+    }
+    else{
+        int threadCreateResult = pthread_create(&subscribersThreads[registeredSubscribers], NULL,
+                                                (void *) publisherThread, NULL);
+        if (threadCreateResult != 0) {
+            printf("Error creating thread for client %d\n", pub_fd);
+        }
+        else{
+            struct timespec time_ex;
+            clock_gettime(CLOCK_REALTIME, &time_ex);
+            double pub_t = time_ex.tv_nsec;
+
+            printf("[%ld.%ld] Nuevo cliente (%d) Suscriptor conectado : %s \n",time_ex.tv_sec,time_ex.tv_nsec,pub_fd ,requestedAction.topic );
+            resFromBroker.response_status = OK;
+            resFromBroker.id = pub_fd;
+
+            printf("ID: %d\n",resFromBroker.id );
+            printf("STATUS: %d\n",resFromBroker.response_status);
+            registeredSubscribers++;
+        }
+    }
+}
+
+void newprocessNewRegistration(int clientSocket){
+    pub_fd = clientSocket;
     pthread_mutex_lock(&mutex);
     if ((recv(pub_fd, &requestedAction, sizeof(requestedAction),0)) < 0) {
         resFromBroker.response_status = _ERROR;
@@ -360,7 +387,7 @@ void newprocessNewRegistration(){
             processNewPublisher();
         }
         else if(requestedAction.action == REGISTER_SUBSCRIBER){
-            //processNewSubscriber(clientSocket);
+            //processNewSubscriber();
         }
     }
     pthread_mutex_unlock(&mutex);
@@ -368,5 +395,18 @@ void newprocessNewRegistration(){
         printf("Send failed from broker\n");
         exit(EXIT_FAILURE);
     }
+}
+
+void *contactSubscriber(){
+    //variable de condicion
+}
+
+void *subscriberThread(){
+    int myId = pub_fd;
+    pthread_create(&subscribersThreads[registeredSubscribers], NULL,(void *) contactSubscriber, NULL);
+    while(requestedAction.action != UNREGISTER_SUBSCRIBER){
+        recv(myId, &requestedAction, sizeof(requestedAction), 0);
+    }
+    pthread_exit(0);
 }
 

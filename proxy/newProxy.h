@@ -70,6 +70,7 @@ void setPort(unsigned int port);
 void setIpPort(char* ip, unsigned int port);
 void sendPublication(char* msg);
 //void * socketThread(void *fd);
+void newprocessNewRegistration();
 
 void * handlePublisherSignal(volatile sig_atomic_t flag);
 void server_closing();

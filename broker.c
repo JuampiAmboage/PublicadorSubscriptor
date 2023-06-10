@@ -67,7 +67,7 @@ int main(int argc, char *argv[]) {
     defineMutex();
     while(1){
         int clientSocket = acceptClient();
-        processNewRegistration(clientSocket);
+        newprocessNewRegistration(clientSocket);
     }
 
     destroyMutex();
