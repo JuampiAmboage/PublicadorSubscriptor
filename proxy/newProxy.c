@@ -23,7 +23,6 @@
 #define SIZE_BUFFER 6000
 
 struct ip_port info;
-
 struct timespec expectedTime;
 struct message msgToBroker;
 struct message requestedAction;
@@ -94,6 +93,8 @@ void tryServerConnection(struct sockaddr_in server){
 }
 
 void trySendingMessage() {
+    struct timespec expectedTime;
+
     clock_gettime( CLOCK_REALTIME , &expectedTime);
     double pub_t = expectedTime.tv_nsec;
 
@@ -106,9 +107,6 @@ void trySendingMessage() {
 }
 //CONEXIÓN DE USO COMÚN PARA PUBLICADOR Y SUBSCRIPTOR - LISTO
 void connectClient(struct sockaddr_in server) {
-    clock_gettime( CLOCK_REALTIME , &expectedTime);
-    double pub_t = expectedTime.tv_nsec;
-
     trySocketCreation();
     tryServerConnection(server);
 }
