@@ -93,8 +93,6 @@ void tryServerConnection(struct sockaddr_in server){
 }
 
 void trySendingMessage() {
-    struct timespec expectedTime;
-
     clock_gettime( CLOCK_REALTIME , &expectedTime);
     double pub_t = expectedTime.tv_nsec;
 
