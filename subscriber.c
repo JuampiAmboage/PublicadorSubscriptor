@@ -10,9 +10,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "proxy/newProxy.h"
+#include "proxy/proxyPubSub.h"
 
-
+struct sockaddr_in server;
 
 struct sockaddr_in getServer(int client_or_server);
 
@@ -50,13 +50,13 @@ int main(int argc, char *argv[]) {
     }
 
     setIpPort(ip, port);
-    struct sockaddr_in server;
+
 
     server = getServer(0);
     printf("---> TOPIC: %s\n\n",topic);
 
     connectSubscriber(server);
-    registerSubscriber(topic);
+    sendSubscriberRegistration(topic);
 
     return 0;
 }

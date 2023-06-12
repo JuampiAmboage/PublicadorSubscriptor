@@ -51,21 +51,30 @@ struct receivedSignal {
     int signalType; // Tipo de señal a enviar
 };
 
+void setIpPort(char* ip, unsigned int port);
 struct sockaddr_in getServer(int client_or_server);
+void connectServer(struct sockaddr_in server);
+
+//COMUNICACION CON BROKER
+void trySendingMessage();
+
+//CONEXION INICIAL
 void trySocketCreation();
 void tryServerConnection(struct sockaddr_in server);
-void trySendingMessage();
 void connectClient(struct sockaddr_in server);
 void connectPublisher(struct sockaddr_in server);
 void connectSubscriber(struct sockaddr_in server);
-void connectServer(struct sockaddr_in server);
+
+//REGISTRO
 void sendRegistration(char* topic);
 void sendPublisherRegistration(char* topic);
 void sendSubscriberRegistration(char* topic);
-void serverClosing();
-void setIpPort(char* ip, unsigned int port);
+
+//PUBLICAR
 void sendPublication(char* msg);
 
+//CIERRE
+void clientsClosing();
 void * handlePublisherSignal(volatile sig_atomic_t flag);
 
 #endif //PUBLICADORSUBSCRIPTOR_PROXYPUBSUB_H

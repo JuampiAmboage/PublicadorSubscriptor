@@ -39,7 +39,7 @@ void setIpPort (char* ip, unsigned int port){
     info.ip_process = ip;
     info.port_process = port;
 }
-//GETTER DEL SERVIDOR - LISTO
+//GETTER DEL SERVIDOR
 struct sockaddr_in getServer(int client_or_server){
     // temp structure variable
     struct sockaddr_in server;
@@ -60,7 +60,7 @@ struct sockaddr_in getServer(int client_or_server){
     return server;
 }
 
-//ABRIMOS EL SOCKET - LISTO
+//ABRIMOS EL SOCKET
 void trySocketCreation(){
     fd_socket = socket(AF_INET, SOCK_STREAM, 0);
     if ((fd_socket ) < 0){
@@ -72,7 +72,7 @@ void trySocketCreation(){
     }
 }
 
-//NOS CONECTAMOS AL SERVIDOR - LISTO
+//NOS CONECTAMOS AL SERVIDOR
 void tryServerConnection(struct sockaddr_in server){
     int connection = connect(fd_socket, (struct sockaddr *)&server,sizeof(server));
     if(connection == -1){
@@ -83,7 +83,7 @@ void tryServerConnection(struct sockaddr_in server){
         printf("connected to the server...\n");
     }
 }
-
+//CLIENTE LE ENVÍA A BROKER
 void trySendingMessage() {
     clock_gettime( CLOCK_REALTIME , &expectedTime);
     double pub_t = expectedTime.tv_nsec;
@@ -95,7 +95,7 @@ void trySendingMessage() {
         printf("Message succesfully send\n");
     }
 }
-//CONEXIÓN DE USO COMÚN PARA PUBLICADOR Y SUBSCRIPTOR - LISTO
+//CONEXIÓN PARA PUBLICADOR Y SUBSCRIPTOR - LISTO
 void connectClient(struct sockaddr_in server) {
     clock_gettime( CLOCK_REALTIME , &expectedTime);
     double pub_t = expectedTime.tv_nsec;
@@ -115,6 +115,7 @@ void connectSubscriber(struct sockaddr_in server){
     printf("[%ld.%ld] Suscriptor conectado con el broker correctamente.\n",expectedTime.tv_sec,expectedTime.tv_nsec);
 }
 
+//ENVIAR REGISTRO A BROKER
 void sendRegistration(char* topic){
     strcpy(msgToBroker.topic, topic);
 
@@ -128,22 +129,23 @@ void sendRegistration(char* topic){
     printf("[%ld.%ld] Registrado correctamente con ID: %d para topic %s\n",expectedTime.tv_sec,expectedTime.tv_nsec,resFromBroker.id,msgToBroker.topic );
 }
 
+//REGISTRO COMO PUBLICAOR
 void sendPublisherRegistration(char* topic){
     msgToBroker.action = REGISTER_PUBLISHER;
     sendRegistration(topic);
 }
-
+//REGISTRO COMO SUSCRIPTOR
 void sendSubscriberRegistration(char* topic){
     msgToBroker.action = REGISTER_SUBSCRIBER;
     sendRegistration(topic);
 }
-
+//PUBLICAMOS
 void sendPublication(char* msg){
     strcpy(msgToBroker.data.data, msg);
     msgToBroker.action = PUBLISH_DATA;
     trySendingMessage();
 }
-
+//ERROR - FINALIZAR PUBLICADOR CON CONTROL+C
 void * handlePublisherSignal(volatile sig_atomic_t flag){
     flag = 1;
     msgToBroker.action = UNREGISTER_PUBLISHER;
@@ -152,10 +154,6 @@ void * handlePublisherSignal(volatile sig_atomic_t flag){
     //falta id
 }
 
-void serverClosing(){
-    close(fd_socket);
-}
-
-void clients_closing(){
+void clientsClosing() {
     close(fd_socket);
 }

@@ -57,22 +57,25 @@ struct receivedSignal {
     int signalType; // Tipo de señal a enviar
 };
 
+void setIpPort(char* ip, unsigned int port);
 struct sockaddr_in getServer(int client_or_server);
-
 void connectServer(struct sockaddr_in server);
-int acceptClient();
-void processNewRegistration(int clientSocket);
-void* registerPublisher();
-void serverClosing();
-void setPort(unsigned int port);
-void setIpPort(char* ip, unsigned int port);;
+void acceptClient();
 
-void server_closing();
-void clients_closing();
 void defineMutex();
 void destroyMutex();
 
-void* threadPublication();
+void processNewRegistration();
+void processNewPublisher();
+void processNewSubscriber();
+
+void *publisherThread();
+void* registerPublisher();
+
+void *contactSubscriber();
+void *subscriberThread();
+
+void serverClosing();
 
 #endif //PUBLICADORSUBSCRIPTOR_NEWPROXY_H
 

@@ -16,10 +16,7 @@
 #include <pthread.h>
 #include <signal.h>
 
-#include "proxy/newProxy.h"
-
-
-
+#include "proxy/proxyPubSub.h"
 #include <getopt.h> //para getopt_long
 
 static volatile __sighandler_t terminated = 0;
@@ -81,7 +78,7 @@ int main(int argc, char *argv[]) {
         sendPublication(&msg);
     }
 
-    printf("CHAU");
+    printf("TERMINADO");
     return 0;
 }
 

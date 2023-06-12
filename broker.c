@@ -14,14 +14,14 @@
 #include <signal.h>
 #include <errno.h>
 #include <pthread.h>
-
-#include "proxy/newProxy.h"
-
-
+#include "proxy/proxyBroker.h"
 #include <getopt.h> //para getopt_long
 #include <stdbool.h>
 
 struct sockaddr_in getServer(int client_or_server);
+
+//estructura del tipo sockaddr para server, guarda info del server
+struct sockaddr_in server;
 
 
 int main(int argc, char *argv[]) {
@@ -56,9 +56,6 @@ int main(int argc, char *argv[]) {
     char* ip = "0.0.0.0"; // 0.0.0.0 / localhost
     setIpPort(ip, port);
 
-    //estructura del tipo sockaddr para server, guarda info del server
-    struct sockaddr_in server;
-
     server = getServer(1);
     printf("---> MODE: %s\n\n",mode);
 
@@ -66,8 +63,8 @@ int main(int argc, char *argv[]) {
 
     defineMutex();
     while(1){
-        int clientSocket = acceptClient();
-        newprocessNewRegistration(clientSocket);
+        acceptClient();
+        processNewRegistration();
     }
 
     destroyMutex();
