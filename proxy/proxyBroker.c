@@ -150,7 +150,7 @@ void processNewRegistration(){
 
 //SE CREA UN NUEVO HILO DE PUBLICADOR
 void processNewPublisher(){
-    if(registeredPublishers+1 > MAX_PUBLISHERS){
+    if(registeredPublishers > MAX_PUBLISHERS || topicCounter > MAX_TOPICS){
         resFromBroker.response_status = LIMIT;
         resFromBroker.id = -1;
     }
