@@ -125,7 +125,7 @@ void destroyMutex(){
 
 //POR CADA REGISTRO ENTRANTE CREAMOS UN HILO
 void processNewRegistration(){
-    //pthread_mutex_lock(&mutex);
+    pthread_mutex_lock(&mutex);
     if ((recv(clientSocket, &requestedAction, sizeof(requestedAction),0)) < 0) {
         resFromBroker.response_status = _ERROR;
         resFromBroker.id = -1;
@@ -138,7 +138,7 @@ void processNewRegistration(){
             //processNewSubscriber();
         }
     }
-   // pthread_mutex_unlock(&mutex);
+   pthread_mutex_unlock(&mutex);
     if( send(clientSocket , &resFromBroker , sizeof(resFromBroker) , 0) < 0){
         printf("Send failed from broker\n");
         exit(EXIT_FAILURE);
@@ -177,13 +177,13 @@ void processNewPublisher(){
 void *publisherThread(){
     int myId = clientSocket;
     while(requestedAction.action != UNREGISTER_PUBLISHER){
-        //pthread_mutex_lock(&mutex);
+        pthread_mutex_lock(&mutex);
 
         recv(myId, &requestedAction, sizeof(requestedAction), 0);
         if (requestedAction.action == PUBLISH_DATA)
             printf("PUBLICANDO: %s\n",requestedAction.data.data);
 
-        //pthread_mutex_unlock(&mutex);
+        pthread_mutex_unlock(&mutex);
     }
     //reorganize() ->reorganizamos el vector de publishers liberando el index
     pthread_exit(0);
