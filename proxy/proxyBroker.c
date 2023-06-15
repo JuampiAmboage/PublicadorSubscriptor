@@ -30,6 +30,9 @@ int registeredPublishers = 0;
 pthread_t subscribersThreads[MAX_SUBSCRIBERS];
 int registeredSubscribers = 0;
 
+Topic topics[MAX_TOPICS];
+int topicCounter = 0;
+
 int fd_socket = 0, fd = 0, clientSocket = 0;
 
 pthread_mutex_t mutex;
@@ -168,6 +171,7 @@ void processNewPublisher(){
 
             printf("ID: %d\n",resFromBroker.id );
             printf("STATUS: %d\n",resFromBroker.response_status);
+            processIncomingTopic(requestedAction.topic);
             registeredPublishers++;
         }
     }
@@ -188,6 +192,28 @@ void *publisherThread(){
     //reorganize() ->reorganizamos el vector de publishers liberando el index
     pthread_exit(0);
 
+}
+
+//BUSCAMOS SI EL TOPIC YA ESTABA EN EL ARREGLO
+int searchTopic(char topicForSearch[]) {
+    for (int i = 0; i < topicCounter; i++) {
+        if (strcmp(topics[i].content, topicForSearch) == 0) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+void processIncomingTopic(char topic[]){
+    int topicIndex = searchTopic(topic);
+    if (topicIndex == -1) { //primera vez que se registra un pub con este topic
+        strcpy(topics[topicCounter].content, topic);
+        topics[topicCounter].publishersCount = 1;
+    }
+    else{
+        topics[topicIndex].publishersCount++;
+    }
+    topicCounter++;
 }
 
 //MISMA FUNCIÓN QUE PARA PUBLICADOR->CREAR FUNCIÓN ÚNICA
