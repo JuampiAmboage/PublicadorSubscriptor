@@ -177,13 +177,13 @@ void processNewPublisher(){
 void *publisherThread(){
     int myId = clientSocket;
     while(requestedAction.action != UNREGISTER_PUBLISHER){
-        pthread_mutex_lock(&mutex);
+        //pthread_mutex_lock(&mutex);
 
         recv(myId, &requestedAction, sizeof(requestedAction), 0);
         if (requestedAction.action == PUBLISH_DATA)
             printf("PUBLICANDO: %s\n",requestedAction.data.data);
 
-        pthread_mutex_unlock(&mutex);
+        //pthread_mutex_unlock(&mutex);
     }
     //reorganize() ->reorganizamos el vector de publishers liberando el index
     pthread_exit(0);
