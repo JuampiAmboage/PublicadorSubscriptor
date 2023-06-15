@@ -34,6 +34,11 @@ struct message {
     struct publish data;
 };
 
+typedef struct{
+    char content[100];
+    int publishersCount;
+} Topic;
+
 enum status {
     _ERROR = 0,
     LIMIT,
@@ -67,6 +72,9 @@ void destroyMutex();
 
 void processNewRegistration();
 void processNewPublisher();
+int searchTopic(char topicForSearch[]);
+void processIncomingTopic(char topic[]);
+
 void processNewSubscriber();
 
 void *publisherThread();
