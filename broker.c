@@ -16,11 +16,25 @@ struct sockaddr_in getServer(int client_or_server);
 //estructura del tipo sockaddr para server, guarda info del server
 struct sockaddr_in server;
 
+pthread_t brokerThreadRegistrator;
+pthread_t brokerThreadNotifier;
+
+int publishersIds[100];
+
+void* handleRegistrations(){
+    while(1){
+        acceptClient();
+        processNewRegistration(publishersIds);
+    }
+}
+
+void* handlePublications(){
+    lookForPublications(publishersIds);
+}
+
 
 int main(int argc, char *argv[]) {
     setbuf(stdout, NULL);
-
-
     int opt= 0;
     int port;
     char *mode;
