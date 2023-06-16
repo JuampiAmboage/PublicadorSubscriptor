@@ -231,7 +231,7 @@ void serverClosing(){
 
 void lookForPublications(int publishersIds[]) {
     while(1) {
-        for (int i = 0; i < registeredPublishers;i++) {
+        for (int i = 0; i < registeredPublishers;i++ ) {
             recv(publishersIds[i], &requestedAction, sizeof(requestedAction), 0);
             if (requestedAction.action == PUBLISH_DATA) {
                 printf("PUBLICANDO: %s\n", requestedAction.data.data);
