@@ -25,10 +25,7 @@ struct response resFromBroker;
 
 int receivedPublication = 0;
 
-pthread_t publisherThreads[MAX_PUBLISHERS];
 int registeredPublishers = 0;
-
-pthread_t subscribersThreads[MAX_SUBSCRIBERS];
 int registeredSubscribers = 0;
 
 Topic topics[MAX_TOPICS];
@@ -37,9 +34,6 @@ int topicCounter = 0;
 int isDataAvailable  = 0;
 
 int fd_socket = 0, fd = 0, clientSocket = 0;
-
-pthread_mutex_t mutex;
-pthread_cond_t cond;
 
 void setIpPort (char* ip, unsigned int port){
     info.ip_process = ip;
@@ -119,16 +113,6 @@ void connectServer(struct sockaddr_in server){
     }
 }
 
-void defineMutex(){
-    pthread_mutex_init(&mutex,NULL);
-    pthread_cond_init(&cond,NULL);
-}
-
-void destroyMutex(){
-    pthread_mutex_destroy(&mutex);
-    pthread_cond_destroy(&cond);
-}
-
 //POR CADA REGISTRO ENTRANTE CREAMOS UN HILO
 void processNewRegistration(){
     pthread_mutex_lock(&mutex);
@@ -186,23 +170,13 @@ void processNewPublisher(){
 //HILO DE PUBLICADOR QUE SE BLOQUEA A LA ESPERA DE PUBLICACIONES
 void *publisherThread(void* args){
     int myId = *(int*)args;
-    while(requestedAction.action != UNREGISTER_PUBLISHER){
-        pthread_mutex_lock(&mutex);
 
-        // Esperar hasta que haya datos disponibles
-        while (!isDataAvailable) {
-            pthread_cond_wait(&cond, &mutex);
-        }
+    while(requestedAction.action != UNREGISTER_PUBLISHER){
 
         //recv(myId, &requestedAction, sizeof(requestedAction), 0);
         if (requestedAction.action == PUBLISH_DATA) {
             printf("PUBLICANDO: %s\n", requestedAction.data.data);
         }
-
-        // Restablecer el indicador de datos disponibles
-        isDataAvailable = 0;
-
-        pthread_mutex_unlock(&mutex);
     }
     //reorganize() ->reorganizamos el vector de publishers liberando el index
     pthread_exit(0);
@@ -233,17 +207,10 @@ void processIncomingTopic(char topic[]){
 
 //MISMA FUNCIÓN QUE PARA PUBLICADOR->CREAR FUNCIÓN ÚNICA
 void processNewSubscriber(){
-    if(registeredSubscribers+1 > MAX_SUBSCRIBERS){
+    if(registeredSubscribers+1 > MAX_SUBSCRIBERS) {
         resFromBroker.response_status = LIMIT;
         resFromBroker.id = -1;
-    }
-    else{
-        int threadCreateResult = pthread_create(&subscribersThreads[registeredSubscribers], NULL,
-                                                (void *) publisherThread, NULL);
-        if (threadCreateResult != 0) {
-            printf("Error creating thread for client %d\n", clientSocket);
-        }
-        else{
+    } else {
             struct timespec time_ex;
             clock_gettime(CLOCK_REALTIME, &time_ex);
             double pub_t = time_ex.tv_nsec;
@@ -257,7 +224,7 @@ void processNewSubscriber(){
             registeredSubscribers++;
         }
     }
-}
+
 
 void *contactSubscriber(){
     //variable de condicion
@@ -265,7 +232,6 @@ void *contactSubscriber(){
 
 void *subscriberThread(){
     int myId = clientSocket;
-    pthread_create(&subscribersThreads[registeredSubscribers], NULL,(void *) contactSubscriber, NULL);
     while(requestedAction.action != UNREGISTER_SUBSCRIBER){
         recv(myId, &requestedAction, sizeof(requestedAction), 0);
     }

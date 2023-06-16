@@ -6,17 +6,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/types.h>
-//#include <sys/socket.h>
-//#include <netinet/in.h>
 #include <string.h>
-#include <unistd.h>
-#include <signal.h>
-#include <errno.h>
 #include <pthread.h>
 #include "proxy/proxyBroker.h"
 #include <getopt.h> //para getopt_long
-#include <stdbool.h>
 
 struct sockaddr_in getServer(int client_or_server);
 
@@ -61,13 +54,12 @@ int main(int argc, char *argv[]) {
 
     connectServer(server);
 
-    defineMutex();
-    while(1){
-        acceptClient();
-        processNewRegistration();
-    }
+    pthread_create(&brokerThreadRegistrator, NULL,(void *) handleRegistrations,NULL);
+    pthread_create(&brokerThreadNotifier, NULL,(void *) handlePublications, NULL);
 
-    destroyMutex();
+    pthread_join(brokerThreadNotifier,NULL);
+    pthread_join(brokerThreadRegistrator,NULL);
+
+
     return 0;
-
 }

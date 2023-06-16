@@ -86,6 +86,8 @@ void *subscriberThread();
 
 void serverClosing();
 
+void lookForPublications(int publishersIds[]);
+
 #endif //PUBLICADORSUBSCRIPTOR_NEWPROXY_H
 
 
