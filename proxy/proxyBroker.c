@@ -138,7 +138,7 @@ void processNewRegistration(){
             //processNewSubscriber();
         }
     }
-   pthread_mutex_unlock(&mutex);
+    pthread_mutex_unlock(&mutex);
     if( send(clientSocket , &resFromBroker , sizeof(resFromBroker) , 0) < 0){
         printf("Send failed from broker\n");
         exit(EXIT_FAILURE);

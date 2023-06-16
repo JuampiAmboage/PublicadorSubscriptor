@@ -74,7 +74,7 @@ int main(int argc, char *argv[]) {
 
     while(!terminated) {
         sleep(3);
-        char msg = 'H';
+        char msg = 'P';
         sendPublication(&msg);
     }
 

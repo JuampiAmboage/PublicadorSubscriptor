@@ -34,11 +34,17 @@ struct message {
     struct publish data;
 };
 
+
 enum status {
     _ERROR = 0,
     LIMIT,
     OK
 };
+typedef struct{
+    char content[100];
+    int publishersCount;
+} Topic;
+
 struct response {
     enum status response_status;
     int id;
@@ -65,8 +71,11 @@ void acceptClient();
 void defineMutex();
 void destroyMutex();
 
-void processNewRegistration();
-void processNewPublisher();
+void processNewRegistration(int publishersIds[]);
+void processNewPublisher(int publishersIds[]);
+int searchTopic(char topicForSearch[]);
+void processIncomingTopic(char topic[]);
+
 void processNewSubscriber();
 
 void *publisherThread();
@@ -76,6 +85,8 @@ void *contactSubscriber();
 void *subscriberThread();
 
 void serverClosing();
+
+void lookForPublications(int publishersIds[]);
 
 #endif //PUBLICADORSUBSCRIPTOR_NEWPROXY_H
 
