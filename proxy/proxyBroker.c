@@ -33,6 +33,8 @@ int registeredSubscribers = 0;
 Topic topics[MAX_TOPICS];
 int topicCounter = 0;
 
+int isDataAvailable  = 0;
+
 int fd_socket = 0, fd = 0, clientSocket = 0;
 
 pthread_mutex_t mutex;
@@ -129,6 +131,7 @@ void destroyMutex(){
 //POR CADA REGISTRO ENTRANTE CREAMOS UN HILO
 void processNewRegistration(){
     pthread_mutex_lock(&mutex);
+
     if ((recv(clientSocket, &requestedAction, sizeof(requestedAction),0)) < 0) {
         resFromBroker.response_status = _ERROR;
         resFromBroker.id = -1;
@@ -136,6 +139,9 @@ void processNewRegistration(){
     else{
         if(requestedAction.action == REGISTER_PUBLISHER){
             processNewPublisher();
+            // Enviar señal al hilo del publicado
+            isDataAvailable = 1;
+            pthread_cond_signal(&cond);
         }
         else if(requestedAction.action == REGISTER_SUBSCRIBER){
             //processNewSubscriber();
@@ -155,8 +161,9 @@ void processNewPublisher(){
         resFromBroker.id = -1;
     }
     else{
+        int* publisherId = malloc(sizeof(int));
         int threadCreateResult = pthread_create(&publisherThreads[registeredPublishers], NULL,
-                                                (void *) publisherThread, NULL);
+                                                (void *) publisherThread, publisherId);
         if (threadCreateResult != 0) {
             printf("Error creating thread for client %d\n", clientSocket);
         }
@@ -178,14 +185,23 @@ void processNewPublisher(){
 }
 
 //HILO DE PUBLICADOR QUE SE BLOQUEA A LA ESPERA DE PUBLICACIONES
-void *publisherThread(){
-    int myId = clientSocket;
-    while(requestedAction.action != UNREGISTER_PUBLISHER){
+void *publisherThread(void* args){
+    int myId = *(int*)args;
+    while(requestedAction.action != UNREGISTER_PUBLISHER && requestedAction.id != myId){
         pthread_mutex_lock(&mutex);
 
-        recv(myId, &requestedAction, sizeof(requestedAction), 0);
-        if (requestedAction.action == PUBLISH_DATA)
-            printf("PUBLICANDO: %s\n",requestedAction.data.data);
+        // Esperar hasta que haya datos disponibles
+        while (!isDataAvailable) {
+            pthread_cond_wait(&cond, &mutex);
+        }
+
+        //recv(myId, &requestedAction, sizeof(requestedAction), 0);
+        if (requestedAction.action == PUBLISH_DATA) {
+            printf("PUBLICANDO: %s\n", requestedAction.data.data);
+        }
+
+        // Restablecer el indicador de datos disponibles
+        isDataAvailable = 0;
 
         pthread_mutex_unlock(&mutex);
     }
