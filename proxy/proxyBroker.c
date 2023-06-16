@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <stdio.h>
+#include <string.h>
 #include "proxyBroker.h"
 
 #define MAX_PUBLISHERS 100
@@ -66,7 +67,7 @@ struct sockaddr_in getServer(int client_or_server){
 }
 //DAR ID AL CLIENTE EN SERVIDOR - LISTO
 void acceptClient(){
-    int clientSocket = accept(fd_socket, (struct sockaddr*)NULL, NULL);
+    clientSocket = accept(fd_socket, (struct sockaddr*)NULL, NULL);
 
     if (clientSocket == -1) {
         printf("Error en accept()\n");
@@ -135,15 +136,13 @@ void processNewRegistration(){
     if ((recv(clientSocket, &requestedAction, sizeof(requestedAction),0)) < 0) {
         resFromBroker.response_status = _ERROR;
         resFromBroker.id = -1;
-    }
-    else{
+    } else {
         if(requestedAction.action == REGISTER_PUBLISHER){
             processNewPublisher();
             // Enviar señal al hilo del publicado
             isDataAvailable = 1;
             pthread_cond_signal(&cond);
-        }
-        else if(requestedAction.action == REGISTER_SUBSCRIBER){
+        } else if(requestedAction.action == REGISTER_SUBSCRIBER) {
             //processNewSubscriber();
         }
     }
@@ -187,7 +186,7 @@ void processNewPublisher(){
 //HILO DE PUBLICADOR QUE SE BLOQUEA A LA ESPERA DE PUBLICACIONES
 void *publisherThread(void* args){
     int myId = *(int*)args;
-    while(requestedAction.action != UNREGISTER_PUBLISHER && requestedAction.id != myId){
+    while(requestedAction.action != UNREGISTER_PUBLISHER){
         pthread_mutex_lock(&mutex);
 
         // Esperar hasta que haya datos disponibles
@@ -277,6 +276,3 @@ void *subscriberThread(){
 void serverClosing(){
     close(fd_socket);
 }
-
-
-
