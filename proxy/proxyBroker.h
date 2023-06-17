@@ -42,7 +42,7 @@ enum status {
 };
 typedef struct{
     char content[100];
-    int publishersCount;
+    int subscribersIds[100];
 } Topic;
 
 struct response {

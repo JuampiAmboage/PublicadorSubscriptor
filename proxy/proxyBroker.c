@@ -29,6 +29,7 @@ int registeredPublishers = 0;
 int registeredSubscribers = 0;
 
 Topic topics[MAX_TOPICS];
+
 int topicCounter = 0;
 int fd_socket = 0, fd = 0, clientSocket = 0;
 
@@ -120,7 +121,7 @@ void processNewRegistration(int publishersIds[]){
             processNewPublisher(publishersIds);
 
         } else if(requestedAction.action == REGISTER_SUBSCRIBER) {
-            //processNewSubscriber();
+            processNewSubscriber();
         }
     }
     if( send(clientSocket , &resFromBroker , sizeof(resFromBroker) , 0) < 0){
@@ -197,20 +198,21 @@ void processNewSubscriber(){
         resFromBroker.response_status = LIMIT;
         resFromBroker.id = -1;
     } else {
-            struct timespec time_ex;
-            clock_gettime(CLOCK_REALTIME, &time_ex);
-            double pub_t = time_ex.tv_nsec;
+        struct timespec time_ex;
+        clock_gettime(CLOCK_REALTIME, &time_ex);
+        double pub_t = time_ex.tv_nsec;
 
-            printf("[%ld.%ld] Nuevo cliente (%d) Suscriptor conectado : %s \n",time_ex.tv_sec,time_ex.tv_nsec,clientSocket ,requestedAction.topic );
-            resFromBroker.response_status = OK;
-            resFromBroker.id = clientSocket;
+        printf("[%ld.%ld] Nuevo cliente (%d) Suscriptor conectado : %s \n",time_ex.tv_sec,time_ex.tv_nsec,clientSocket ,requestedAction.topic );
+        resFromBroker.response_status = OK;
+        resFromBroker.id = clientSocket;
 
-            printf("ID: %d\n",resFromBroker.id );
-            printf("STATUS: %d\n",resFromBroker.response_status);
-            registeredSubscribers++;
-        }
+        printf("ID: %d\n",resFromBroker.id );
+        printf("STATUS: %d\n",resFromBroker.response_status);
+        int topicIndex = searchTopic(requestedAction.topic);
+        topics[topicIndex].subscribersIds[registeredSubscribers] = clientSocket;
+        registeredSubscribers++;
     }
-
+}
 
 void *contactSubscriber(){
     //variable de condicion
