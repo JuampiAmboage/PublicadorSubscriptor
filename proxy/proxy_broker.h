@@ -44,4 +44,6 @@ message_t receive_message(int socket);
 
 bool can_launch_publisher(message_t msg, topic_t topics[10], int topic_count);
 
+void launch_publisher(message_t msg, topic_t topics[10], int *topic_count, int socket, pthread_mutex_t *topic_mutex);
+
 #endif

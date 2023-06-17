@@ -97,3 +97,97 @@ bool can_launch_publisher(message_t msg, topic_t topics[10], int topic_count)
 
     return (pub_count <= 100) && (topic_exists || topic_count < 10);
 }
+
+void add_publisher(char topic[100], topic_t topics[10], int *topic_count)
+{
+    for (int i = 0; i < *topic_count; i++)
+    {
+        if (strcmp(topic, topics[i].name) == 0)
+        {
+            topics[i].pub_count++;
+            return;
+        }
+    }
+
+    strcpy(topics[*topic_count].name, topic);
+    topics[*topic_count].pub_count = 1;
+    topics[*topic_count].sub_count = 0;
+    (*topic_count)++;
+}
+
+typedef struct publisher
+{
+    char topic_name[100];
+    int socket;
+    topic_t *topics;
+    int *topic_count;
+    pthread_mutex_t *topic_mutex;
+} publisher_t;
+
+void send_all(int socket, const void *buffer, size_t length)
+{
+    const char *ptr = buffer;
+    size_t total = 0;
+    ssize_t sent = 0;
+
+    while (total < length)
+    {
+        if ((sent = send(socket, ptr + total, length - total, 0)) == -1)
+            error("send");
+
+        total += sent;
+    }
+}
+
+void publish_data_sequential(publisher_t *pub, message_t msg)
+{
+    pthread_mutex_lock(pub->topic_mutex);
+    for (int i = 0; i < *pub->topic_count; i++)
+    {
+        if (strcmp(pub->topic_name, pub->topics[i].name) == 0)
+        {
+            for (int j = 0; j < pub->topics[i].sub_count; j++)
+            {
+                send_all(pub->topics[i].subs[j], &msg.data, sizeof(publish_t));
+            }
+            break;
+        }
+    }
+    pthread_mutex_unlock(pub->topic_mutex);
+}
+
+void *publisher(void *arg)
+{
+    publisher_t *pub = (publisher_t *)arg;
+
+    message_t message;
+    while (true)
+    {
+        message = receive_message(pub->socket);
+        if (message.action != PUBLISH_DATA)
+            break;
+
+        publish_data_sequential(pub, message);
+    }
+
+    close(pub->socket);
+    free(pub);
+    return NULL;
+}
+
+void launch_publisher(message_t msg, topic_t topics[10], int *topic_count, int socket, pthread_mutex_t *topic_mutex)
+{
+    publisher_t *arg = malloc(sizeof(publisher_t));
+    strcpy(arg->topic_name, msg.topic);
+    arg->socket = socket;
+    arg->topics = topics;
+    arg->topic_count = topic_count;
+    arg->topic_mutex = topic_mutex;
+    pthread_t thread;
+    if (pthread_create(&thread, NULL, publisher, arg))
+        error("pthread_create");
+
+    add_publisher(msg.topic, topics, topic_count);
+
+    pthread_detach(thread);
+}
