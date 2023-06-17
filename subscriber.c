@@ -58,6 +58,10 @@ int main(int argc, char *argv[]) {
     connectSubscriber(server);
     sendSubscriberRegistration(topic);
 
+    while(1){
+        listenForPublications();
+    }
+
     return 0;
 }
 

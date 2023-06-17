@@ -73,6 +73,9 @@ void sendSubscriberRegistration(char* topic);
 //PUBLICAR
 void sendPublication(char* msg);
 
+//RECIBIR PUBLICACIÓN
+void listenForPublications()
+
 //CIERRE
 void clientsClosing();
 void * handlePublisherSignal(volatile sig_atomic_t flag);
