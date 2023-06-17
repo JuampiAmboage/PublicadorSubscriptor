@@ -41,6 +41,8 @@ int main(int argc, char *argv[])
         }
         else
         {
+            respond_error(client_socket);
+            close(client_socket);
         }
     }
 

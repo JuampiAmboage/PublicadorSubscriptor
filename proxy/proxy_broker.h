@@ -50,4 +50,6 @@ void launch_publisher(message_t msg, topic_t topics[10], int *topic_count, int s
 
 void launch_subscriber(message_t msg, topic_t topics[10], int *topic_count, int socket, pthread_mutex_t *topic_mutex);
 
+void respond_error(int socket);
+
 #endif

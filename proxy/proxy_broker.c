@@ -31,6 +31,19 @@ typedef struct subscriber
     pthread_mutex_t *topic_mutex;
 } subscriber_t;
 
+enum status
+{
+    ERROR = 0,
+    LIMIT,
+    OK
+};
+
+typedef struct response
+{
+    enum status response_status;
+    int id;
+} response_t;
+
 void error(const char *message)
 {
     perror(message);
@@ -316,4 +329,12 @@ void launch_subscriber(message_t msg, topic_t topics[10], int *topic_count, int 
     add_subscriber(msg.topic, topics, topic_count, socket, topic_mutex);
 
     pthread_detach(thread);
+}
+
+void respond_error(int socket)
+{
+    response_t msg;
+    msg.response_status = ERROR;
+    msg.id = -1;
+    send_all(socket, &msg, sizeof(response_t));
 }
