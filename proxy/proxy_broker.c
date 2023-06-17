@@ -22,6 +22,15 @@ typedef struct publisher
     pthread_mutex_t *topic_mutex;
 } publisher_t;
 
+typedef struct subscriber
+{
+    char topic_name[100];
+    int socket;
+    topic_t *topics;
+    int *topic_count;
+    pthread_mutex_t *topic_mutex;
+} subscriber_t;
+
 void error(const char *message)
 {
     perror(message);
@@ -233,6 +242,36 @@ void launch_publisher(message_t msg, topic_t topics[10], int *topic_count, int s
         error("pthread_create");
 
     add_publisher(msg.topic, topics, topic_count);
+
+    pthread_detach(thread);
+}
+
+void add_subscriber(char topic[100], topic_t topics[10], int *topic_count, int socket, pthread_mutex_t *topic_mutex)
+{
+    pthread_mutex_lock(topic_mutex);
+    for (int i = 0; i < *topic_count; i++)
+    {
+        if (strcmp(topic, topics[i].name) == 0)
+        {
+            topics[i].subs[topics[i].sub_count++] = socket;
+        }
+    }
+    pthread_mutex_unlock(topic_mutex);
+}
+
+void launch_subscriber(message_t msg, topic_t topics[10], int *topic_count, int socket, pthread_mutex_t *topic_mutex)
+{
+    subscriber_t *arg = malloc(sizeof(subscriber_t));
+    strcpy(arg->topic_name, msg.topic);
+    arg->socket = socket;
+    arg->topics = topics;
+    arg->topic_count = topic_count;
+    arg->topic_mutex = topic_mutex;
+    pthread_t thread;
+    if (pthread_create(&thread, NULL, subscriber, arg))
+        error("pthread_create");
+
+    add_subscriber(msg.topic, topics, topic_count, socket, topic_mutex);
 
     pthread_detach(thread);
 }
