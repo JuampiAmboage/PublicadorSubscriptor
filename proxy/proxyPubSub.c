@@ -163,7 +163,7 @@ void listenForPublications(){
     clock_gettime( CLOCK_REALTIME , &expectedTime);
     double pub_t = expectedTime.tv_nsec;
 
-    if(recv(fd_socket , &msgT , sizeof(resFromBroker) , 0) < 0){
+    if(recv(fd_socket , &incomingPublication , sizeof(resFromBroker) , 0) < 0){
         printf("Reception in sub failed\n");
         exit(EXIT_FAILURE);
     }
