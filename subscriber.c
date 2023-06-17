@@ -64,8 +64,8 @@ int main(int argc, char *argv[]) {
 
     connectSubscriber(server);
 
-    if( sendSubscriberRegistration(topic) < 0){
-        printf("No hay mas lugar para publicadores\n");
+    if(sendSubscriberRegistration(topic) < 0){
+        printf("No hay mas lugar para suscriptores\n");
         exit(EXIT_FAILURE);
     }
 

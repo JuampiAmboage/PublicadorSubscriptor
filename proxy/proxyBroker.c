@@ -12,7 +12,7 @@
 #include <string.h>
 #include "proxyBroker.h"
 
-#define MAX_PUBLISHERS 1
+#define MAX_PUBLISHERS 100
 #define MAX_SUBSCRIBERS 900
 #define MAX_TOPICS 10
 #define SIZE_BUFFER 6000
