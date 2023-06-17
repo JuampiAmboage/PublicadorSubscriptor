@@ -1,4 +1,3 @@
-
 #ifndef PUBLICADORSUBSCRIPTOR_PROXYPUBSUB_H
 #define PUBLICADORSUBSCRIPTOR_PROXYPUBSUB_H
 
@@ -66,15 +65,15 @@ void connectPublisher(struct sockaddr_in server);
 void connectSubscriber(struct sockaddr_in server);
 
 //REGISTRO
-void sendRegistration(char* topic);
-void sendPublisherRegistration(char* topic);
-void sendSubscriberRegistration(char* topic);
+int sendRegistration(char* topic);
+int sendPublisherRegistration(char* topic);
+int sendSubscriberRegistration(char* topic);
 
 //PUBLICAR
 void sendPublication(char* msg);
 
 //RECIBIR PUBLICACIÓN
-void listenForPublications()
+void listenForPublications();
 
 //CIERRE
 void clientsClosing();

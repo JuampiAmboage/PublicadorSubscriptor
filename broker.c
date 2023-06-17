@@ -13,10 +13,9 @@
 
 int main(int argc, char *argv[])
 {
-
-    char *mode;
-    char *ip = "0.0.0.0";
+    int opt = 0;
     int port = 6666;
+    char *mode;
 
     topic_t topics[10];
     int topic_count = 0;

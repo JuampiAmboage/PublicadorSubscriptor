@@ -117,7 +117,7 @@ void connectSubscriber(struct sockaddr_in server){
 }
 
 //ENVIAR REGISTRO A BROKER
-void sendRegistration(char* topic){
+int sendRegistration(char* topic){
     strcpy(msgToBroker.topic, topic);
 
     trySendingMessage();
@@ -128,17 +128,18 @@ void sendRegistration(char* topic){
     }
 
     printf("[%ld.%ld] Registrado correctamente con ID: %d para topic %s\n",expectedTime.tv_sec,expectedTime.tv_nsec,resFromBroker.id,msgToBroker.topic );
+    return resFromBroker.id;
 }
 
 //REGISTRO COMO PUBLICAOR
-void sendPublisherRegistration(char* topic){
+int sendPublisherRegistration(char* topic){
     msgToBroker.action = REGISTER_PUBLISHER;
-    sendRegistration(topic);
+    return sendRegistration(topic);
 }
 //REGISTRO COMO SUSCRIPTOR
-void sendSubscriberRegistration(char* topic){
+int sendSubscriberRegistration(char* topic){
     msgToBroker.action = REGISTER_SUBSCRIBER;
-    sendRegistration(topic);
+    return sendRegistration(topic);
 }
 //PUBLICAMOS
 void sendPublication(char* msg){
@@ -166,9 +167,8 @@ void listenForPublications(){
     if(recv(fd_socket , &incomingPublication , sizeof(incomingPublication) , 0) < 0){
         printf("Reception in sub failed\n");
         exit(EXIT_FAILURE);
-    }
-    else {
-        printf("[%d.%d] Recibido mensaje topic: %s - mensaje: %s\n",
+    } else {
+        printf("[%ld.%ld] Recibido mensaje topic: %s - mensaje: %s\n",
                expectedTime.tv_sec, expectedTime.tv_nsec, incomingPublication.topic, incomingPublication.data.data);
     }
     //FALTA: Generó: $time_generated_data - Recibido: $time_received_data - Latencia: $latency

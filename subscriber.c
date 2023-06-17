@@ -63,7 +63,11 @@ int main(int argc, char *argv[]) {
     printf("---> TOPIC: %s\n\n",topic);
 
     connectSubscriber(server);
-    sendSubscriberRegistration(topic);
+
+    if(sendSubscriberRegistration(topic) < 0){
+        printf("No hay mas lugar para suscriptores\n");
+        exit(EXIT_FAILURE);
+    }
 
     while(!terminated){
         listenForPublications();
