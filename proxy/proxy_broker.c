@@ -98,6 +98,21 @@ bool can_launch_publisher(message_t msg, topic_t topics[10], int topic_count)
     return (pub_count <= 100) && (topic_exists || topic_count < 10);
 }
 
+bool can_launch_subscriber(message_t msg, topic_t topics[10], int topic_count)
+{
+    int sub_count = 0;
+    bool topic_exists = false;
+    for (int i = 0; i < topic_count; i++)
+    {
+        sub_count += topics[i].sub_count;
+        if (strcmp(msg.topic, topics[i].name) == 0)
+        {
+            topic_exists = true;
+        }
+    }
+    return (sub_count < 900) && topic_exists;
+}
+
 void add_publisher(char topic[100], topic_t topics[10], int *topic_count)
 {
     for (int i = 0; i < *topic_count; i++)
@@ -125,10 +140,18 @@ void unregister_publisher(char topic[100], topic_t *topics, int *topic_count, pt
             topics[i].pub_count--;
             if (topics[i].pub_count == 0)
             {
+                // Close all subscriber sockets
+                for (int j = 0; j < topics[i].sub_count; j++)
+                {
+                    close(topics[i].subs[j]);
+                }
+
+                // Remove topic
                 for (int j = i; j < *topic_count - 1; j++)
                 {
                     topics[j] = topics[j + 1];
                 }
+
                 (*topic_count)--;
             }
             return;
