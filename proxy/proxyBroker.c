@@ -243,8 +243,8 @@ void sendToSubscribers(){
     int topicIndex = searchTopic(requestedAction.topic);
 
     for (int i=0; i<registeredSubscribers;i++){
-        if( send( topics[topicIndex].subscribersIds[i] , &resFromBroker , sizeof(resFromBroker) , 0) < 0){
-            printf("Send failed from broker to id \n");
+        if( send( topics[topicIndex].subscribersIds[i] , &requestedAction , sizeof(requestedAction) , 0) < 0){
+            printf("Send failed from broker to sub \n");
             exit(EXIT_FAILURE);
         }
     }
