@@ -83,6 +83,7 @@ void *subscriberThread();
 void serverClosing();
 
 void lookForPublications(int publishersIds[]);
+void resizeIds(int idFromPubToDelete)
 
 void sendToSubscribers();
 
