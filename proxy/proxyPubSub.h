@@ -74,7 +74,7 @@ void sendSubscriberRegistration(char* topic);
 void sendPublication(char* msg);
 
 //RECIBIR PUBLICACIÓN
-void listenForPublications()
+void listenForPublications();
 
 //CIERRE
 void clientsClosing();
