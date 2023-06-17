@@ -171,7 +171,7 @@ void listenForPublications(){
         printf("[%d.%d] Recibido mensaje topic: %s - mensaje: %s\n",
                expectedTime.tv_sec, expectedTime.tv_nsec, incomingPublication.topic, incomingPublication.data.data);
     }
-    //FALTA: Generó: $time_generated_data - Recibido: $time_received_data - Latencia: $latency.
+    //FALTA: Generó: $time_generated_data - Recibido: $time_received_data - Latencia: $latency
 }
 
 void clientsClosing() {
