@@ -144,6 +144,21 @@ bool can_launch_subscriber(message_t msg, topic_t topics[10], int topic_count)
     return (sub_count < 900) && topic_exists;
 }
 
+void send_all(int socket, const void *buffer, size_t length)
+{
+    const char *ptr = buffer;
+    size_t total = 0;
+    ssize_t sent = 0;
+
+    while (total < length)
+    {
+        if ((sent = send(socket, ptr + total, length - total, 0)) == -1)
+            error("send");
+
+        total += sent;
+    }
+}
+
 void respond_ok(int socket, int id)
 {
     response_t msg;
@@ -200,21 +215,6 @@ void unregister_publisher(char topic[100], topic_t *topics, int *topic_count, pt
     pthread_mutex_unlock(topic_mutex);
 }
 
-void send_all(int socket, const void *buffer, size_t length)
-{
-    const char *ptr = buffer;
-    size_t total = 0;
-    ssize_t sent = 0;
-
-    while (total < length)
-    {
-        if ((sent = send(socket, ptr + total, length - total, 0)) == -1)
-            error("send");
-
-        total += sent;
-    }
-}
-
 void publish_data_sequential(publisher_t *pub, message_t msg)
 {
     pthread_mutex_lock(pub->topic_mutex);
@@ -269,7 +269,7 @@ void launch_publisher(message_t msg, topic_t topics[10], int *topic_count, int s
     pthread_detach(thread);
 }
 
-int add_subscriber(char topic[100], topic_t topics[10], int *topic_count, int socket, pthread_mutex_t *topic_mutex)
+void add_subscriber(char topic[100], topic_t topics[10], int *topic_count, int socket, pthread_mutex_t *topic_mutex)
 {
     pthread_mutex_lock(topic_mutex);
     for (int i = 0; i < *topic_count; i++)
@@ -337,7 +337,7 @@ void launch_subscriber(message_t msg, topic_t topics[10], int *topic_count, int 
     if (pthread_create(&thread, NULL, subscriber, arg))
         error("pthread_create");
 
-    int id = add_subscriber(msg.topic, topics, topic_count, socket, topic_mutex);
+    add_subscriber(msg.topic, topics, topic_count, socket, topic_mutex);
 
     pthread_detach(thread);
 }

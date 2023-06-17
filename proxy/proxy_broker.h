@@ -52,4 +52,6 @@ void launch_subscriber(message_t msg, topic_t topics[10], int *topic_count, int 
 
 void respond_error(int socket);
 
+void respond_limit(int socket);
+
 #endif
