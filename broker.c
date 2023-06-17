@@ -4,7 +4,6 @@
 #include <Winsock2.h>
 #endif
 
-#include <arpa/inet.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
