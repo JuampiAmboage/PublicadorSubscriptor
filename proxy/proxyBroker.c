@@ -232,7 +232,8 @@ void lookForPublications(int publishersIds[]) {
         for (int i = 0; i < registeredPublishers;i++ ) {
             recv(publishersIds[i], &requestedAction, sizeof(requestedAction), 0);
             if (requestedAction.action == PUBLISH_DATA) {
-                printf("PUBLICANDO: %s\n", requestedAction.data.data);
+                printf("PUBLICANDO PARA SUBS: %s\n", requestedAction.data.data);
+                sendToSubscribers();
             }
         }
     }
