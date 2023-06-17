@@ -170,6 +170,7 @@ void listenForPublications(){
     else {
         printf("[%ld.%ld] Recibido mensaje topic: %s - mensaje: %s\n",
                expectedTime.tv_sec, expectedTime.tv_nsec, incomingPublication.topic, incomingPublication.data.data);
+        //sleep(1);
     }
     //FALTA: Generó: $time_generated_data - Recibido: $time_received_data - Latencia: $latency
 }
