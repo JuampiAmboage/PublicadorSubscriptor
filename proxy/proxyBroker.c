@@ -224,7 +224,12 @@ void publish_data_sequential(publisher_t *pub, message_t msg)
         {
             for (int j = 0; j < pub->topics[i].sub_count; j++)
             {
-                send_all(pub->topics[i].subs[j], &msg.data, sizeof(publish_t));
+                message_t send;
+                send.action = PUBLISH_DATA;
+                strcpy(send.topic, msg.topic);
+                send.data = msg.data;
+                send.id = msg.id;
+                send_all(pub->topics[i].subs[j], &send, sizeof(message_t));
             }
             break;
         }
