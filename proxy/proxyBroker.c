@@ -183,18 +183,14 @@ int searchTopic(char topicForSearch[]) {
 void processIncomingTopic(char topic[]){
     int topicIndex = searchTopic(topic);
     if (topicIndex == -1) { //primera vez que se registra un pub con este topic
-        strcpy(topics[topicCounter].content, topic);
-        topics[topicCounter].publishersCount = 1;
+        strcpy_s(topics[topicCounter].content, topic);
+        topicCounter++;
     }
-    else{
-        topics[topicIndex].publishersCount++;
-    }
-    topicCounter++;
 }
 
 //MISMA FUNCIÓN QUE PARA PUBLICADOR->CREAR FUNCIÓN ÚNICA
 void processNewSubscriber(){
-    if(registeredSubscribers+1 > MAX_SUBSCRIBERS) {
+    if(registeredSubscribers > MAX_SUBSCRIBERS) {
         resFromBroker.response_status = LIMIT;
         resFromBroker.id = -1;
     } else {
