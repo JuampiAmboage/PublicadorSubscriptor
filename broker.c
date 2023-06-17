@@ -5,90 +5,61 @@
 #endif
 
 #include <stdio.h>
+#include <unistd.h>
 #include <stdlib.h>
-#include <string.h>
-#include <pthread.h>
-#include "proxy/proxyBroker.h"
-#include <getopt.h> //para getopt_long
-#include <signal.h>
+#include <stdbool.h>
 
-int terminated = 0;
+#include "proxy/proxy_broker.h"
 
-struct sockaddr_in getServer(int client_or_server);
-
-//estructura del tipo sockaddr para server, guarda info del server
-struct sockaddr_in server;
-
-pthread_t brokerThreadRegistrator;
-pthread_t brokerThreadNotifier;
-
-int publishersIds[100];
-
-void sigintHandler(int sig_num){
-    signal(SIGINT, sigintHandler);
-    terminated = 1;
-
-    pthread_cancel(brokerThreadRegistrator);
-    pthread_cancel(brokerThreadNotifier);
-
-    serverClosing();
-    fflush(stdout);
-}
-
-void* handleRegistrations(){
-    while(!terminated){
-        acceptClient();
-        processNewRegistration(publishersIds);
-    }
-}
-
-void* handlePublications(){
-    lookForPublications(publishersIds);
-}
-
-
-int main(int argc, char *argv[]) {
-    signal(SIGINT, sigintHandler);
-    setbuf(stdout, NULL);
-
-    int opt= 0;
-    int port;
+int main(int argc, char *argv[])
+{
+    int opt = 0;
+    int port = 6666;
     char *mode;
 
-    static struct option long_options[] = {
-            {"port",      required_argument,       0,  'a' },
-            {"mode", required_argument,       0,  'b' },
-    };
+    topic_t topics[10];
+    int topic_count = 0;
 
-    int long_index = 0;
-    while ((opt = getopt_long(argc, argv,"ab",long_options, &long_index )) != -1) {
-        switch (opt) {
-            case 'a' :
-                port = atoi(optarg);
-                break;
-            case 'b' :
-                mode = optarg;
-                break;
+    int server_socket = init_server(port);
 
-            default:
-                printf("?? getopt returned character code 0%o ??\n", opt);
-                exit(EXIT_FAILURE);
+    // init topic mutex
+    pthread_mutex_t topic_mutex;
+    pthread_mutex_init(&topic_mutex, NULL);
+
+    while (true)
+    {
+        int client_socket = accept_client(server_socket);
+        message_t msg = receive_message(client_socket);
+        if (msg.action == REGISTER_PUBLISHER)
+        {
+            if (can_launch_publisher(msg, topics, topic_count))
+            {
+                launch_publisher(msg, topics, &topic_count, client_socket, &topic_mutex);
+            }
+            else
+            {
+                respond_limit(client_socket);
+                close(client_socket);
+            }
+        }
+        else if (msg.action == REGISTER_SUBSCRIBER && can_launch_subscriber(msg, topics, topic_count))
+        {
+            if (can_launch_subscriber(msg, topics, topic_count))
+            {
+                launch_subscriber(msg, topics, &topic_count, client_socket, &topic_mutex);
+            }
+            else
+            {
+                respond_limit(client_socket);
+                close(client_socket);
+            }
+        }
+        else
+        {
+            respond_error(client_socket);
+            close(client_socket);
         }
     }
-
-    char* ip = "0.0.0.0"; // 0.0.0.0 / localhost
-    setIpPort(ip, port);
-
-    server = getServer(1);
-    printf("---> MODE: %s\n\n",mode);
-
-    connectServer(server);
-
-    pthread_create(&brokerThreadRegistrator, NULL,(void *) handleRegistrations,NULL);
-    pthread_create(&brokerThreadNotifier, NULL,(void *) handlePublications, NULL);
-
-    pthread_join(brokerThreadNotifier,NULL);
-    pthread_join(brokerThreadRegistrator,NULL);
 
     return 0;
 }
