@@ -6,28 +6,30 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/types.h>
-//#include <sys/socket.h>
-//#include <netinet/in.h>
 #include <string.h>
 #include <unistd.h>
 #include <signal.h>
 #include <errno.h>
 #include <pthread.h>
-#include <signal.h>
 
 #include "proxy/proxyPubSub.h"
 #include <getopt.h> //para getopt_long
 
-static volatile __sighandler_t terminated = 0;
+int terminated = 0;
 
 struct sockaddr_in getServer(int client_or_server);
 
+void sigintHandler(int sig_num){
+    signal(SIGINT, sigintHandler);
+    terminated = 1;
+    fflush(stdout);
+}
+
 int main(int argc, char *argv[]) {
-    //signal(SIGINT, handlePublisherSignal);
+    signal(SIGINT, sigintHandler);
     setbuf(stdout, NULL);
 
-    int opt= 0;
+    int opt = 0;
     int port;
     char *ip,*topic;
 
@@ -74,11 +76,12 @@ int main(int argc, char *argv[]) {
 
     while(!terminated) {
         sleep(3);
-        char msg = 'P';
-        sendPublication(&msg);
+        sendPublication(topic);
     }
 
-    printf("TERMINADO");
+    unregister(1);
+    printf("TERMINADO\n");
+
     return 0;
 }
 

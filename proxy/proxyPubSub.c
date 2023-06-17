@@ -145,10 +145,14 @@ void sendPublication(char* msg){
     msgToBroker.action = PUBLISH_DATA;
     trySendingMessage();
 }
-//ERROR - FINALIZAR PUBLICADOR CON CONTROL+C
-void * handlePublisherSignal(volatile sig_atomic_t flag){
-    flag = 1;
-    msgToBroker.action = UNREGISTER_PUBLISHER;
+
+void unregister(int isPublisher){
+    if(isPublisher) {
+        msgToBroker.action = UNREGISTER_PUBLISHER;
+    } else {
+        msgToBroker.action = UNREGISTER_SUBSCRIBER;
+    }
+
     trySendingMessage();
     printf("[%ld.%ld] De-Registrado correctamente del broker.\n",expectedTime.tv_sec,expectedTime.tv_nsec);
     //falta id

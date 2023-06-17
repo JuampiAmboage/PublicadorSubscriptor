@@ -75,6 +75,6 @@ void sendPublication(char* msg);
 
 //CIERRE
 void clientsClosing();
-void * handlePublisherSignal(volatile sig_atomic_t flag);
+void unregister(int isPublisher);
 
 #endif //PUBLICADORSUBSCRIPTOR_PROXYPUBSUB_H

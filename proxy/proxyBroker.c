@@ -183,7 +183,7 @@ int searchTopic(char topicForSearch[]) {
 void processIncomingTopic(char topic[]){
     int topicIndex = searchTopic(topic);
     if (topicIndex == -1) { //primera vez que se registra un pub con este topic
-        strcpy_s(topics[topicCounter].content, topic);
+        strcpy(topics[topicCounter].content, topic);
         topicCounter++;
     }
 }
