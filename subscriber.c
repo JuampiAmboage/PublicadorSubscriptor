@@ -9,25 +9,14 @@
 #include <getopt.h> //para getopt_long
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 
 #include "proxy/proxyPubSub.h"
-
-int terminated = 0;
 
 struct sockaddr_in server;
 
 struct sockaddr_in getServer(int client_or_server);
 
-void sigintHandler(int sig_num){
-    signal(SIGINT, sigintHandler);
-    terminated = 1;
-    fflush(stdout);
-}
-
-
 int main(int argc, char *argv[]) {
-    signal(SIGINT, sigintHandler);
     setbuf(stdout, NULL);
 
     int opt= 0;
@@ -69,13 +58,9 @@ int main(int argc, char *argv[]) {
     connectSubscriber(server);
     sendSubscriberRegistration(topic);
 
-    while(!terminated) {
-        sleep(3);
-        printf("--------FAKE RECIBIENDO----------\n");
+    while(1){
+        listenForPublications();
     }
-
-    unregister(1);
-    printf("TERMINADO\n");
 
     return 0;
 }

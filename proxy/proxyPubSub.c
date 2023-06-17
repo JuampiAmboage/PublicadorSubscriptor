@@ -22,6 +22,7 @@ struct ip_port info;
 
 struct timespec expectedTime;
 struct message msgToBroker;
+struct message incomingPublication;
 struct response resFromBroker;
 
 int receivedPublication = 0;
@@ -156,6 +157,21 @@ void unregister(int isPublisher){
     trySendingMessage();
     printf("[%ld.%ld] De-Registrado correctamente del broker.\n",expectedTime.tv_sec,expectedTime.tv_nsec);
     //falta id
+}
+
+void listenForPublications(){
+    clock_gettime( CLOCK_REALTIME , &expectedTime);
+    double pub_t = expectedTime.tv_nsec;
+
+    if(recv(fd_socket , &msgT , sizeof(resFromBroker) , 0) < 0){
+        printf("Reception in sub failed\n");
+        exit(EXIT_FAILURE);
+    }
+    else {
+        printf("[%d.%d] Recibido mensaje topic: %s - mensaje: %s\n",
+               expectedTime.tv_sec, expectedTime.tv_nsec, incomingPublication.topic, incomingPublication.data.data);
+    }
+    //FALTA: Generó: $time_generated_data - Recibido: $time_received_data - Latencia: $latency.
 }
 
 void clientsClosing() {
