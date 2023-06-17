@@ -259,6 +259,48 @@ void add_subscriber(char topic[100], topic_t topics[10], int *topic_count, int s
     pthread_mutex_unlock(topic_mutex);
 }
 
+void unregister_subscriber(char topic[100], topic_t *topics, int *topic_count, pthread_mutex_t *topic_mutex, int socket)
+{
+    pthread_mutex_lock(topic_mutex);
+    for (int i = 0; i < *topic_count; i++)
+    {
+        if (strcmp(topic, topics[i].name) == 0)
+        {
+            for (int j = 0; j < topics[i].sub_count; j++)
+            {
+                if (topics[i].subs[j] == socket)
+                {
+                    for (int k = j; k < topics[i].sub_count - 1; k++)
+                    {
+                        topics[i].subs[k] = topics[i].subs[k + 1];
+                    }
+                    topics[i].sub_count--;
+                    break;
+                }
+            }
+            break;
+        }
+    }
+    pthread_mutex_unlock(topic_mutex);
+}
+
+void *subscriber(void *arg)
+{
+    subscriber_t *sub = (subscriber_t *)arg;
+
+    message_t message;
+    do
+    {
+        message = receive_message(sub->socket);
+    } while (message.action != UNREGISTER_SUBSCRIBER);
+
+    unregister_subscriber(sub->topic_name, sub->topics, sub->topic_count, sub->topic_mutex, sub->socket);
+
+    close(sub->socket);
+    free(sub);
+    return NULL;
+}
+
 void launch_subscriber(message_t msg, topic_t topics[10], int *topic_count, int socket, pthread_mutex_t *topic_mutex)
 {
     subscriber_t *arg = malloc(sizeof(subscriber_t));
