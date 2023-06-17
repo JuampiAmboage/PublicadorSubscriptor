@@ -115,6 +115,28 @@ void add_publisher(char topic[100], topic_t topics[10], int *topic_count)
     (*topic_count)++;
 }
 
+void unregister_publisher(char topic[100], topic_t *topics, int *topic_count, pthread_mutex_t *topic_mutex)
+{
+    pthread_mutex_lock(topic_mutex);
+    for (int i = 0; i < *topic_count; i++)
+    {
+        if (strcmp(topic, topics[i].name) == 0)
+        {
+            topics[i].pub_count--;
+            if (topics[i].pub_count == 0)
+            {
+                for (int j = i; j < *topic_count - 1; j++)
+                {
+                    topics[j] = topics[j + 1];
+                }
+                (*topic_count)--;
+            }
+            return;
+        }
+    }
+    pthread_mutex_unlock(topic_mutex);
+}
+
 typedef struct publisher
 {
     char topic_name[100];
@@ -161,14 +183,14 @@ void *publisher(void *arg)
     publisher_t *pub = (publisher_t *)arg;
 
     message_t message;
-    while (true)
+    do
     {
         message = receive_message(pub->socket);
-        if (message.action != PUBLISH_DATA)
-            break;
+        if (message.action == PUBLISH_DATA)
+            publish_data_sequential(pub, message);
+    } while (message.action != UNREGISTER_PUBLISHER);
 
-        publish_data_sequential(pub, message);
-    }
+    unregister_publisher(pub->topic_name, pub->topics, pub->topic_count, pub->topic_mutex);
 
     close(pub->socket);
     free(pub);
