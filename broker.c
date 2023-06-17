@@ -37,6 +37,7 @@ int main(int argc, char *argv[])
         }
         else if (msg.action == REGISTER_SUBSCRIBER && can_launch_subscriber(msg, topics, topic_count))
         {
+            launch_subscriber(msg, topics, &topic_count, client_socket, &topic_mutex);
         }
         else
         {
