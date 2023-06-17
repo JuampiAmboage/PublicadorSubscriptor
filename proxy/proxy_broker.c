@@ -13,6 +13,15 @@
 
 #include "proxy_broker.h"
 
+typedef struct publisher
+{
+    char topic_name[100];
+    int socket;
+    topic_t *topics;
+    int *topic_count;
+    pthread_mutex_t *topic_mutex;
+} publisher_t;
+
 void error(const char *message)
 {
     perror(message);
@@ -159,15 +168,6 @@ void unregister_publisher(char topic[100], topic_t *topics, int *topic_count, pt
     }
     pthread_mutex_unlock(topic_mutex);
 }
-
-typedef struct publisher
-{
-    char topic_name[100];
-    int socket;
-    topic_t *topics;
-    int *topic_count;
-    pthread_mutex_t *topic_mutex;
-} publisher_t;
 
 void send_all(int socket, const void *buffer, size_t length)
 {
