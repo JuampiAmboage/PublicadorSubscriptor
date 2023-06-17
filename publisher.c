@@ -9,11 +9,9 @@
 #include <string.h>
 #include <unistd.h>
 #include <signal.h>
-#include <errno.h>
-#include <pthread.h>
+#include <getopt.h> //para getopt_long
 
 #include "proxy/proxyPubSub.h"
-#include <getopt.h> //para getopt_long
 
 int terminated = 0;
 

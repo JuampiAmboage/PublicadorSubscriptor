@@ -4,19 +4,26 @@
 #include <Winsock2.h>
 #endif
 
-#include <errno.h>
-#include <pthread.h>
 #include <getopt.h> //para getopt_long
 #include <stdio.h>
 #include <stdlib.h>
 
 #include "proxy/proxyPubSub.h"
 
+int terminated = 0;
+
 struct sockaddr_in server;
 
 struct sockaddr_in getServer(int client_or_server);
 
+void sigintHandler(int sig_num){
+    signal(SIGINT, sigintHandler);
+    terminated = 1;
+    fflush(stdout);
+}
+
 int main(int argc, char *argv[]) {
+    signal(SIGINT, sigintHandler);
     setbuf(stdout, NULL);
 
     int opt= 0;
@@ -58,9 +65,12 @@ int main(int argc, char *argv[]) {
     connectSubscriber(server);
     sendSubscriberRegistration(topic);
 
-    while(1){
+    while(!terminated){
         listenForPublications();
     }
+
+    unregister(0);
+    printf("TERMINADO\n");
 
     return 0;
 }
