@@ -240,6 +240,7 @@ void *publisher(void *arg)
     do
     {
         message = receive_message(pub->socket);
+        printf("Mensaje: %s\n", message.data.data);
         if (message.action == PUBLISH_DATA)
             publish_data_sequential(pub, message);
     } while (message.action != UNREGISTER_PUBLISHER);
