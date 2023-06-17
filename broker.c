@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
                 close(client_socket);
             }
         }
-        else if (msg.action == REGISTER_SUBSCRIBER && can_launch_subscriber(msg, topics, topic_count))
+        else if (msg.action == REGISTER_SUBSCRIBER)
         {
             if (can_launch_subscriber(msg, topics, topic_count))
             {
