@@ -135,7 +135,7 @@ void processNewRegistration(int publishersIds[]){
 
 //SE CREA UN NUEVO HILO DE PUBLICADOR
 int processNewPublisher(int publishersIds[]){
-    if(registeredPublishers > MAX_PUBLISHERS || topicCounter > MAX_TOPICS){
+    if(registeredPublishers >= MAX_PUBLISHERS || topicCounter >= MAX_TOPICS){
         resFromBroker.response_status = LIMIT;
         resFromBroker.id = -1;
     }
@@ -194,7 +194,7 @@ void processIncomingTopic(char topic[]){
 
 //MISMA FUNCIÓN QUE PARA PUBLICADOR->CREAR FUNCIÓN ÚNICA
 void processNewSubscriber(){
-    if(registeredSubscribers > MAX_SUBSCRIBERS) {
+    if(registeredSubscribers >= MAX_SUBSCRIBERS) {
         resFromBroker.response_status = LIMIT;
         resFromBroker.id = -1;
     } else {
@@ -234,10 +234,10 @@ void serverClosing(){
     close(fd_socket);
 }
 
-void resizeIds(int idFromPubToDelete) {
+void resizeIds(int idFromPubToDelete, int publisherIDs[]) {
     // Desplazar los elementos hacia la izquierda a partir del índice especificado
     for (int i = idFromPubToDelete; i < registeredPublishers - 1; i++) {
-        arreglo[i] = arreglo[i + 1];
+        publisherIDs[i] = publisherIDs[i + 1];
     }
 }
 
@@ -250,7 +250,7 @@ void lookForPublications(int publishersIds[]) {
                 sendToSubscribers();
             }
             else if(requestedAction.action == UNREGISTER_PUBLISHER){
-                resizeIds(i);
+                resizeIds(i, publishersIds);
                 registeredPublishers--;
             }
         }
