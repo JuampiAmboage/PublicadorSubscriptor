@@ -42,4 +42,6 @@ int accept_client(int server_socket);
 
 message_t receive_message(int socket);
 
+bool can_launch_publisher(message_t msg, topic_t topics[10], int topic_count);
+
 #endif

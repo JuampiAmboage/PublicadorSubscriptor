@@ -27,6 +27,15 @@ int main(int argc, char *argv[])
     {
         int client_socket = accept_client(server_socket);
         message_t msg = receive_message(client_socket);
+        if (msg.action == REGISTER_PUBLISHER && can_launch_publisher(msg, topics, topic_count))
+        {
+        }
+        else if (msg.action == REGISTER_SUBSCRIBER)
+        {
+        }
+        else
+        {
+        }
     }
 
     return 0;

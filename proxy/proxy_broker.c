@@ -57,8 +57,6 @@ int accept_client(int server_socket)
     if (client_socket < 0)
         error("accept");
 
-    printf("Accepted client\n");
-
     return client_socket;
 }
 
@@ -82,4 +80,20 @@ message_t receive_message(int socket)
     message_t msg;
     receive_all(socket, &msg, sizeof(message_t));
     return msg;
+}
+
+bool can_launch_publisher(message_t msg, topic_t topics[10], int topic_count)
+{
+    int pub_count = 0;
+    bool topic_exists = false;
+    for (int i = 0; i < topic_count; i++)
+    {
+        pub_count += topics[i].pub_count;
+        if (strcmp(msg.topic, topics[i].name) == 0)
+        {
+            topic_exists = true;
+        }
+    }
+
+    return (pub_count <= 100) && (topic_exists || topic_count < 10);
 }
