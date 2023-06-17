@@ -259,7 +259,15 @@ void launch_publisher(message_t msg, topic_t topics[10], int *topic_count, int s
     pthread_detach(thread);
 }
 
-void add_subscriber(char topic[100], topic_t topics[10], int *topic_count, int socket, pthread_mutex_t *topic_mutex)
+void respond_ok(int socket, int id)
+{
+    response_t msg;
+    msg.id = id;
+    msg.response_status = OK;
+    send_all(socket, &msg, sizeof(response_t));
+}
+
+int add_subscriber(char topic[100], topic_t topics[10], int *topic_count, int socket, pthread_mutex_t *topic_mutex)
 {
     pthread_mutex_lock(topic_mutex);
     for (int i = 0; i < *topic_count; i++)
@@ -326,7 +334,7 @@ void launch_subscriber(message_t msg, topic_t topics[10], int *topic_count, int 
     if (pthread_create(&thread, NULL, subscriber, arg))
         error("pthread_create");
 
-    add_subscriber(msg.topic, topics, topic_count, socket, topic_mutex);
+    int id = add_subscriber(msg.topic, topics, topic_count, socket, topic_mutex);
 
     pthread_detach(thread);
 }
