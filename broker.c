@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#include "proxy/proxy_broker.h"
+#include "proxy/proxyBroker.h"
 
 int main(int argc, char *argv[])
 {

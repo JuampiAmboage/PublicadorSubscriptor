@@ -11,7 +11,7 @@
 #include <stdbool.h>
 #include <arpa/inet.h>
 
-#include "proxy_broker.h"
+#include "proxyBroker.h"
 
 typedef struct publisher
 {
