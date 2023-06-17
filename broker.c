@@ -31,9 +31,17 @@ int main(int argc, char *argv[])
     {
         int client_socket = accept_client(server_socket);
         message_t msg = receive_message(client_socket);
-        if (msg.action == REGISTER_PUBLISHER && can_launch_publisher(msg, topics, topic_count))
+        if (msg.action == REGISTER_PUBLISHER)
         {
-            launch_publisher(msg, topics, &topic_count, client_socket, &topic_mutex);
+            if (can_launch_publisher(msg, topics, topic_count))
+            {
+                launch_publisher(msg, topics, &topic_count, client_socket, &topic_mutex);
+            }
+            else
+            {
+                respond_limit(client_socket);
+                close(client_socket);
+            }
         }
         else if (msg.action == REGISTER_SUBSCRIBER && can_launch_subscriber(msg, topics, topic_count))
         {
