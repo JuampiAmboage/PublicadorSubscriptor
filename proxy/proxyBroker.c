@@ -12,7 +12,7 @@
 #include <string.h>
 #include "proxyBroker.h"
 
-#define MAX_PUBLISHERS 100
+#define MAX_PUBLISHERS 1
 #define MAX_SUBSCRIBERS 900
 #define MAX_TOPICS 10
 #define SIZE_BUFFER 6000
@@ -27,6 +27,8 @@ int receivedPublication = 0;
 
 int registeredPublishers = 0;
 int registeredSubscribers = 0;
+
+int serverIsClosed = 1;
 
 Topic topics[MAX_TOPICS];
 
@@ -49,7 +51,7 @@ struct sockaddr_in getServer(int client_or_server){
         server.sin_addr.s_addr = htonl(INADDR_ANY);//Cualquier interfaz(IP) del server
 
     server.sin_port = htons(info.port_process);
-
+    serverIsClosed = 0;
 
     printf("---> IP: %s\n", info.ip_process);
     printf("---> STATUS_CODE: %d\n", server.sin_addr.s_addr);
@@ -132,7 +134,7 @@ void processNewRegistration(int publishersIds[]){
 }
 
 //SE CREA UN NUEVO HILO DE PUBLICADOR
-void processNewPublisher(int publishersIds[]){
+int processNewPublisher(int publishersIds[]){
     if(registeredPublishers > MAX_PUBLISHERS || topicCounter > MAX_TOPICS){
         resFromBroker.response_status = LIMIT;
         resFromBroker.id = -1;
@@ -152,6 +154,8 @@ void processNewPublisher(int publishersIds[]){
         publishersIds[registeredPublishers] = clientSocket;
         registeredPublishers++;
     }
+
+    return resFromBroker.id;
 }
 
 //HILO DE PUBLICADOR QUE SE BLOQUEA A LA ESPERA DE PUBLICACIONES
@@ -224,12 +228,15 @@ void *subscriberThread(){
 
 
 void serverClosing(){
+    printf("\n");
+    printf("server closed\n");
+    serverIsClosed = 1;
     close(fd_socket);
 }
 
 void lookForPublications(int publishersIds[]) {
-    while(1) {
-        for (int i = 0; i < registeredPublishers;i++ ) {
+    while(!serverIsClosed) {
+        for (int i = 0; i < registeredPublishers; i++) {
             recv(publishersIds[i], &requestedAction, sizeof(requestedAction), 0);
             if (requestedAction.action == PUBLISH_DATA) {
                 printf("PUBLICANDO PARA SUBS: %s\n", requestedAction.data.data);

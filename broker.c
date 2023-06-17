@@ -10,6 +10,9 @@
 #include <pthread.h>
 #include "proxy/proxyBroker.h"
 #include <getopt.h> //para getopt_long
+#include <signal.h>
+
+int terminated = 0;
 
 struct sockaddr_in getServer(int client_or_server);
 
@@ -21,8 +24,19 @@ pthread_t brokerThreadNotifier;
 
 int publishersIds[100];
 
+void sigintHandler(int sig_num){
+    signal(SIGINT, sigintHandler);
+    terminated = 1;
+
+    pthread_cancel(brokerThreadRegistrator);
+    pthread_cancel(brokerThreadNotifier);
+
+    serverClosing();
+    fflush(stdout);
+}
+
 void* handleRegistrations(){
-    while(1){
+    while(!terminated){
         acceptClient();
         processNewRegistration(publishersIds);
     }
@@ -34,7 +48,9 @@ void* handlePublications(){
 
 
 int main(int argc, char *argv[]) {
+    signal(SIGINT, sigintHandler);
     setbuf(stdout, NULL);
+
     int opt= 0;
     int port;
     char *mode;
@@ -73,7 +89,6 @@ int main(int argc, char *argv[]) {
 
     pthread_join(brokerThreadNotifier,NULL);
     pthread_join(brokerThreadRegistrator,NULL);
-
 
     return 0;
 }

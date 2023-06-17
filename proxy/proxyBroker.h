@@ -68,7 +68,7 @@ void defineMutex();
 void destroyMutex();
 
 void processNewRegistration(int publishersIds[]);
-void processNewPublisher(int publishersIds[]);
+int processNewPublisher(int publishersIds[]);
 int searchTopic(char topicForSearch[]);
 void processIncomingTopic(char topic[]);
 

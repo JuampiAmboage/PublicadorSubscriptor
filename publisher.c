@@ -70,7 +70,11 @@ int main(int argc, char *argv[]) {
     printf("---> TOPIC: %s\n\n",topic);
 
     connectPublisher(server);
-    sendPublisherRegistration(topic);
+
+    if(sendPublisherRegistration(topic) < 0){
+        printf("No hay mas lugar para publicadores\n");
+        exit(EXIT_FAILURE);
+    }
 
     while(!terminated) {
         sleep(3);
