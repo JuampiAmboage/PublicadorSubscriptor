@@ -234,6 +234,13 @@ void serverClosing(){
     close(fd_socket);
 }
 
+void resizeIds(int idFromPubToDelete) {
+    // Desplazar los elementos hacia la izquierda a partir del índice especificado
+    for (int i = idFromPubToDelete; i < registeredPublishers - 1; i++) {
+        arreglo[i] = arreglo[i + 1];
+    }
+}
+
 void lookForPublications(int publishersIds[]) {
     while(!serverIsClosed) {
         for (int i = 0; i < registeredPublishers; i++) {
@@ -241,6 +248,10 @@ void lookForPublications(int publishersIds[]) {
             if (requestedAction.action == PUBLISH_DATA) {
                 printf("PUBLICANDO PARA SUBS: %s\n", requestedAction.data.data);
                 sendToSubscribers();
+            }
+            else if(requestedAction.action == UNREGISTER_PUBLISHER){
+                resizeIds(i);
+                registeredPublishers--;
             }
         }
     }
