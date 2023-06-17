@@ -3,6 +3,14 @@
 
 #include <pthread.h>
 
+typedef struct topic
+{
+    char name[100];
+    int pub_count;
+    int sub_count;
+    int subs[900];
+} topic_t;
+
 enum operations
 {
     REGISTER_PUBLISHER = 0,
@@ -12,13 +20,13 @@ enum operations
     PUBLISH_DATA
 };
 
-struct publish
+typedef struct publish
 {
     struct timespec time_generated_data;
     char data[100];
 } publish_t;
 
-struct message
+typedef struct message
 {
     enum operations action;
     char topic[100];
@@ -29,5 +37,9 @@ struct message
 } message_t;
 
 int init_server(int port);
+
+int accept_client(int server_socket);
+
+message_t receive_message(int socket);
 
 #endif

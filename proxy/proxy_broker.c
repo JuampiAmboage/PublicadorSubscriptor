@@ -47,3 +47,39 @@ int init_server(int port)
 
     return server_socket;
 }
+
+int accept_client(int server_socket)
+{
+    struct sockaddr_in client;
+    socklen_t len = sizeof(client);
+
+    int client_socket = accept(server_socket, (struct sockaddr *)&client, &len);
+    if (client_socket < 0)
+        error("accept");
+
+    printf("Accepted client\n");
+
+    return client_socket;
+}
+
+void receive_all(int socket, void *buffer, size_t length)
+{
+    char *ptr = buffer;
+    size_t total = 0;
+    ssize_t received = 0;
+
+    while (total < length)
+    {
+        if ((received = recv(socket, ptr + total, length - total, 0)) <= 0)
+            error("recv");
+
+        total += received;
+    }
+}
+
+message_t receive_message(int socket)
+{
+    message_t msg;
+    receive_all(socket, &msg, sizeof(message_t));
+    return msg;
+}
