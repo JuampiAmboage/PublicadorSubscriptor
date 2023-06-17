@@ -349,3 +349,11 @@ void respond_error(int socket)
     msg.id = -1;
     send_all(socket, &msg, sizeof(response_t));
 }
+
+void respond_limit(int socket)
+{
+    response_t msg;
+    msg.response_status = LIMIT;
+    msg.id = -1;
+    send_all(socket, &msg, sizeof(response_t));
+}
