@@ -144,14 +144,22 @@ bool can_launch_subscriber(message_t msg, topic_t topics[10], int topic_count)
     return (sub_count < 900) && topic_exists;
 }
 
-void add_publisher(char topic[100], topic_t topics[10], int *topic_count)
+void respond_ok(int socket, int id)
+{
+    response_t msg;
+    msg.id = id;
+    msg.response_status = OK;
+    send_all(socket, &msg, sizeof(response_t));
+}
+
+int add_publisher(char topic[100], topic_t topics[10], int *topic_count)
 {
     for (int i = 0; i < *topic_count; i++)
     {
         if (strcmp(topic, topics[i].name) == 0)
         {
             topics[i].pub_count++;
-            return;
+            return topics[i].pub_count;
         }
     }
 
@@ -159,6 +167,7 @@ void add_publisher(char topic[100], topic_t topics[10], int *topic_count)
     topics[*topic_count].pub_count = 1;
     topics[*topic_count].sub_count = 0;
     (*topic_count)++;
+    return 1;
 }
 
 void unregister_publisher(char topic[100], topic_t *topics, int *topic_count, pthread_mutex_t *topic_mutex)
@@ -254,17 +263,10 @@ void launch_publisher(message_t msg, topic_t topics[10], int *topic_count, int s
     if (pthread_create(&thread, NULL, publisher, arg))
         error("pthread_create");
 
-    add_publisher(msg.topic, topics, topic_count);
+    int id = add_publisher(msg.topic, topics, topic_count);
+    respond_ok(socket, id);
 
     pthread_detach(thread);
-}
-
-void respond_ok(int socket, int id)
-{
-    response_t msg;
-    msg.id = id;
-    msg.response_status = OK;
-    send_all(socket, &msg, sizeof(response_t));
 }
 
 int add_subscriber(char topic[100], topic_t topics[10], int *topic_count, int socket, pthread_mutex_t *topic_mutex)
@@ -275,6 +277,7 @@ int add_subscriber(char topic[100], topic_t topics[10], int *topic_count, int so
         if (strcmp(topic, topics[i].name) == 0)
         {
             topics[i].subs[topics[i].sub_count++] = socket;
+            respond_ok(socket, topics[i].sub_count);
         }
     }
     pthread_mutex_unlock(topic_mutex);
