@@ -185,6 +185,14 @@ int add_publisher(char topic[100], topic_t topics[10], int *topic_count)
     return 1;
 }
 
+void close_publisher(int socket)
+{
+    message_t msg;
+    msg.action = UNREGISTER_SUBSCRIBER;
+    send_all(socket, &msg, sizeof(message_t));
+    close(socket);
+}
+
 void unregister_publisher(char topic[100], topic_t *topics, int *topic_count, pthread_mutex_t *topic_mutex)
 {
     pthread_mutex_lock(topic_mutex);
@@ -198,7 +206,7 @@ void unregister_publisher(char topic[100], topic_t *topics, int *topic_count, pt
                 // Close all subscriber sockets
                 for (int j = 0; j < topics[i].sub_count; j++)
                 {
-                    close(topics[i].subs[j]);
+                    close_subscriber(topics[i].subs[j]);
                 }
 
                 // Remove topic
