@@ -185,7 +185,7 @@ int add_publisher(char topic[100], topic_t topics[10], int *topic_count)
     return 1;
 }
 
-void close_publisher(int socket)
+void close_subscriber(int socket)
 {
     message_t msg;
     msg.action = UNREGISTER_SUBSCRIBER;
