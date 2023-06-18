@@ -194,6 +194,19 @@ void close_subscriber(int socket)
     close(socket);
 }
 
+void print_client_update(char *topic, int id, topic_t topics[10], int *topic_count, char *client_type, char *action)
+{
+    struct timespec now;
+    clock_gettime(CLOCK_REALTIME, &now);
+
+    printf("[%ld.%09ld] %s cliente (%i) %s conectado: %s\n", now.tv_sec, now.tv_nsec, action, id, client_type, topic);
+    printf("Resumen:\n");
+    for (int i = 0; i < *topic_count; i++)
+    {
+        printf("%s: %i Subscriptores - %i Publicadores\n", topics[i].name, topics[i].sub_count, topics[i].pub_count);
+    }
+}
+
 void unregister_publisher(char topic[100], topic_t *topics, int *topic_count, pthread_mutex_t *topic_mutex)
 {
     pthread_mutex_lock(topic_mutex);
@@ -218,6 +231,7 @@ void unregister_publisher(char topic[100], topic_t *topics, int *topic_count, pt
 
                 (*topic_count)--;
             }
+            print_client_update(topic, topics[i].pub_count + 2, topics, topic_count, "Publicador", "Desconectado");
             return;
         }
     }
@@ -360,19 +374,6 @@ void *publisher(void *arg)
     return NULL;
 }
 
-void print_new_client(char *topic, int id, topic_t topics[10], int *topic_count, char *client_type)
-{
-    struct timespec now;
-    clock_gettime(CLOCK_REALTIME, &now);
-
-    printf("[%ld.%09ld] Nuevo cliente (%i) %s conectado: %s\n", now.tv_sec, now.tv_nsec, id, client_type, topic);
-    printf("Resumen:\n");
-    for (int i = 0; i < *topic_count; i++)
-    {
-        printf("%s: %i Subscriptores - %i Publicadores\n", topics[i].name, topics[i].sub_count, topics[i].pub_count);
-    }
-}
-
 void launch_publisher(message_t msg, topic_t topics[10], int *topic_count, int socket, pthread_mutex_t *topic_mutex, int mode)
 {
     publisher_t *arg = malloc(sizeof(publisher_t));
@@ -389,7 +390,7 @@ void launch_publisher(message_t msg, topic_t topics[10], int *topic_count, int s
     pthread_mutex_lock(topic_mutex);
     int id = add_publisher(msg.topic, topics, topic_count);
     respond_ok(socket, id);
-    print_new_client(msg.topic, id, topics, topic_count, "Publicador");
+    print_client_update(msg.topic, id, topics, topic_count, "Publicador", "Nuevo");
     pthread_mutex_unlock(topic_mutex);
 
     pthread_detach(thread);
@@ -424,6 +425,7 @@ void unregister_subscriber(char topic[100], topic_t *topics, int *topic_count, p
                         topics[i].subs[k] = topics[i].subs[k + 1];
                     }
                     topics[i].sub_count--;
+                    print_client_update(topic, j + 1, topics, topic_count, "Subscriptor", "Eliminado");
                     break;
                 }
             }
@@ -464,7 +466,7 @@ void launch_subscriber(message_t msg, topic_t topics[10], int *topic_count, int 
 
     pthread_mutex_lock(topic_mutex);
     int id = add_subscriber(msg.topic, topics, topic_count, socket);
-    print_new_client(msg.topic, id, topics, topic_count, "Publicador");
+    print_client_update(msg.topic, id, topics, topic_count, "Suscriptor", "Nuevo");
     pthread_mutex_unlock(topic_mutex);
 
     pthread_detach(thread);
