@@ -160,12 +160,15 @@ void unregister(int isPublisher){
     //falta id
 }
 
-void listenForPublications(){
-    clock_gettime( CLOCK_REALTIME , &expectedTime);
+void listenForPublications() {
+    clock_gettime(CLOCK_REALTIME, &expectedTime);
     double pub_t = expectedTime.tv_nsec;
 
-    if(recv(fd_socket , &incomingPublication , sizeof(incomingPublication) , 0) < 0){
+    if (recv(fd_socket, &incomingPublication, sizeof(incomingPublication), 0) < 0) {
         printf("Reception in sub failed\n");
+        exit(EXIT_FAILURE);
+    } else if(incomingPublication.action == UNREGISTER_SUBSCRIBER) {
+        unregister(0);
         exit(EXIT_FAILURE);
     } else {
         printf("[%ld.%ld] Recibido mensaje topic: %s - mensaje: %s\n",
