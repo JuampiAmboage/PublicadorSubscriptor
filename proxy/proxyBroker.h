@@ -3,6 +3,13 @@
 
 #include <pthread.h>
 
+enum mode
+{
+    SEQUENTIAL = 0,
+    PARALLEL,
+    FAIR
+};
+
 typedef struct topic
 {
     char name[100];
@@ -46,7 +53,7 @@ bool can_launch_publisher(message_t msg, topic_t topics[10], int topic_count);
 
 bool can_launch_subscriber(message_t msg, topic_t topics[10], int topic_count);
 
-void launch_publisher(message_t msg, topic_t topics[10], int *topic_count, int socket, pthread_mutex_t *topic_mutex);
+void launch_publisher(message_t msg, topic_t topics[10], int *topic_count, int socket, pthread_mutex_t *topic_mutex, int mode);
 
 void launch_subscriber(message_t msg, topic_t topics[10], int *topic_count, int socket, pthread_mutex_t *topic_mutex);
 

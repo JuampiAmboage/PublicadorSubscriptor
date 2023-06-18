@@ -20,6 +20,7 @@ typedef struct publisher
     topic_t *topics;
     int *topic_count;
     pthread_mutex_t *topic_mutex;
+    int mode;
 } publisher_t;
 
 typedef struct subscriber
@@ -245,9 +246,58 @@ void publish_data_sequential(publisher_t *pub, message_t msg)
     pthread_mutex_unlock(pub->topic_mutex);
 }
 
+typedef struct
+{
+    int socket;
+    message_t msg;
+} thread_send_message_args_t;
+
+void *thread_send_message(void *arg)
+{
+    thread_send_message_args_t *args = (thread_send_message_args_t *)arg;
+    send_all(args->socket, &args->msg, sizeof(message_t));
+    free(args);
+    return NULL;
+}
+
+void publish_data_parallel(publisher_t *pub, message_t msg)
+{
+    pthread_t thread;
+    pthread_mutex_lock(pub->topic_mutex);
+    for (int i = 0; i < *pub->topic_count; i++)
+    {
+        if (strcmp(pub->topic_name, pub->topics[i].name) == 0)
+        {
+            for (int j = 0; j < pub->topics[i].sub_count; j++)
+            {
+                message_t send;
+                send.action = PUBLISH_DATA;
+                strcpy(send.topic, msg.topic);
+                send.data = msg.data;
+                send.id = msg.id;
+                thread_send_message_args_t *args = malloc(sizeof(thread_send_message_args_t));
+                args->socket = pub->topics[i].subs[j];
+                args->msg = send;
+                if (pthread_create(&thread, NULL, thread_send_message, args))
+                    error("pthread_create");
+                pthread_detach(thread);
+            }
+            break;
+        }
+    }
+    pthread_mutex_unlock(pub->topic_mutex);
+}
+
 void *publisher(void *arg)
 {
     publisher_t *pub = (publisher_t *)arg;
+
+    void (*publisher_mode)(publisher_t *, message_t) = &publish_data_sequential;
+
+    if (pub->mode == PARALLEL)
+    {
+        publisher_mode = &publish_data_parallel;
+    }
 
     message_t message;
     do
@@ -255,7 +305,7 @@ void *publisher(void *arg)
         message = receive_message(pub->socket);
         printf("Mensaje: %s\n", message.data.data);
         if (message.action == PUBLISH_DATA)
-            publish_data_sequential(pub, message);
+            publisher_mode(pub, message);
     } while (message.action != UNREGISTER_PUBLISHER);
 
     unregister_publisher(pub->topic_name, pub->topics, pub->topic_count, pub->topic_mutex);
@@ -265,7 +315,7 @@ void *publisher(void *arg)
     return NULL;
 }
 
-void launch_publisher(message_t msg, topic_t topics[10], int *topic_count, int socket, pthread_mutex_t *topic_mutex)
+void launch_publisher(message_t msg, topic_t topics[10], int *topic_count, int socket, pthread_mutex_t *topic_mutex, int mode)
 {
     publisher_t *arg = malloc(sizeof(publisher_t));
     strcpy(arg->topic_name, msg.topic);
@@ -273,6 +323,7 @@ void launch_publisher(message_t msg, topic_t topics[10], int *topic_count, int s
     arg->topics = topics;
     arg->topic_count = topic_count;
     arg->topic_mutex = topic_mutex;
+    arg->mode = mode;
     pthread_t thread;
     if (pthread_create(&thread, NULL, publisher, arg))
         error("pthread_create");
