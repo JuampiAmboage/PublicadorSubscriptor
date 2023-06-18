@@ -35,148 +35,192 @@ int registeredSubscribers = 0;
 
 int fd_socket = 0, fd = 0, pub_fd = 0, sub_fd = 0;
 
-
-void setIpPort (char* ip, unsigned int port){
+void setIpPort(char *ip, unsigned int port)
+{
     info.ip_process = ip;
     info.port_process = port;
 }
-//GETTER DEL SERVIDOR
-struct sockaddr_in getServer(int client_or_server){
+// GETTER DEL SERVIDOR
+struct sockaddr_in getServer(int client_or_server)
+{
     // temp structure variable
     struct sockaddr_in server;
-    server.sin_family = AF_INET; //Familia Ipv4
+    server.sin_family = AF_INET; // Familia Ipv4
 
-    if(client_or_server == 0) //0 cliente
+    if (client_or_server == 0) // 0 cliente
         server.sin_addr.s_addr = inet_addr(info.ip_process);
-    else  //1 servidor
-        server.sin_addr.s_addr = htonl(INADDR_ANY);//Cualquier interfaz(IP) del server
+    else                                            // 1 servidor
+        server.sin_addr.s_addr = htonl(INADDR_ANY); // Cualquier interfaz(IP) del server
 
     server.sin_port = htons(info.port_process);
 
-
     printf("---> IP: %s\n", info.ip_process);
     printf("---> STATUS_CODE: %d\n", server.sin_addr.s_addr);
-    printf("---> PORT: %d\n",server.sin_port);
+    printf("---> PORT: %d\n", server.sin_port);
 
     return server;
 }
 
-//ABRIMOS EL SOCKET
-void trySocketCreation(){
+// ABRIMOS EL SOCKET
+void trySocketCreation()
+{
     fd_socket = socket(AF_INET, SOCK_STREAM, 0);
-    if ((fd_socket ) < 0){
+    if ((fd_socket) < 0)
+    {
         perror("Socket open error");
         exit(EXIT_FAILURE);
     }
-    else{
+    else
+    {
         printf("Socket successfully created...\n");
     }
 }
 
-//NOS CONECTAMOS AL SERVIDOR
-void tryServerConnection(struct sockaddr_in server){
-    int connection = connect(fd_socket, (struct sockaddr *)&server,sizeof(server));
-    if(connection == -1){
+// NOS CONECTAMOS AL SERVIDOR
+void tryServerConnection(struct sockaddr_in server)
+{
+    int connection = connect(fd_socket, (struct sockaddr *)&server, sizeof(server));
+    if (connection == -1)
+    {
         printf("connect() error\n");
         exit(EXIT_FAILURE);
     }
-    else{
+    else
+    {
         printf("connected to the server...\n");
     }
 }
-//CLIENTE LE ENVÍA A BROKER
-void trySendingMessage() {
-    clock_gettime( CLOCK_REALTIME , &expectedTime);
+// CLIENTE LE ENVÍA A BROKER
+void trySendingMessage()
+{
+    clock_gettime(CLOCK_REALTIME, &expectedTime);
     double pub_t = expectedTime.tv_nsec;
 
-    if (send(fd_socket, &msgToBroker, sizeof(msgToBroker), 0) < 0) {
+    if (send(fd_socket, &msgToBroker, sizeof(msgToBroker), 0) < 0)
+    {
         printf("Send failed\n");
         exit(EXIT_FAILURE);
-    } else {
+    }
+    else
+    {
         printf("Message succesfully send\n");
     }
 }
-//CONEXIÓN PARA PUBLICADOR Y SUBSCRIPTOR - LISTO
-void connectClient(struct sockaddr_in server) {
-    clock_gettime( CLOCK_REALTIME , &expectedTime);
+// CONEXIÓN PARA PUBLICADOR Y SUBSCRIPTOR - LISTO
+void connectClient(struct sockaddr_in server)
+{
+    clock_gettime(CLOCK_REALTIME, &expectedTime);
     double pub_t = expectedTime.tv_nsec;
 
     trySocketCreation();
     tryServerConnection(server);
 }
-//CONECTARSE COMO PUBLICADOR - LISTO
-void connectPublisher(struct sockaddr_in server){
+// CONECTARSE COMO PUBLICADOR - LISTO
+void connectPublisher(struct sockaddr_in server)
+{
     connectClient(server);
-    printf("[%ld.%ld] Publisher conectado con el broker correctamente.\n",expectedTime.tv_sec,expectedTime.tv_nsec);
+    printf("[%ld.%ld] Publisher conectado con el broker correctamente.\n", expectedTime.tv_sec, expectedTime.tv_nsec);
 }
 
-//CONECTARSE COMO SUBSCRIPTOR - LISTO
-void connectSubscriber(struct sockaddr_in server){
+// CONECTARSE COMO SUBSCRIPTOR - LISTO
+void connectSubscriber(struct sockaddr_in server)
+{
     connectClient(server);
-    printf("[%ld.%ld] Suscriptor conectado con el broker correctamente.\n",expectedTime.tv_sec,expectedTime.tv_nsec);
+    printf("[%ld.%ld] Suscriptor conectado con el broker correctamente.\n", expectedTime.tv_sec, expectedTime.tv_nsec);
 }
 
-//ENVIAR REGISTRO A BROKER
-int sendRegistration(char* topic){
+// ENVIAR REGISTRO A BROKER
+int sendRegistration(char *topic)
+{
     strcpy(msgToBroker.topic, topic);
 
     trySendingMessage();
 
-    if(recv(fd_socket , &resFromBroker , sizeof(resFromBroker) , 0) < 0){
+    if (recv(fd_socket, &resFromBroker, sizeof(resFromBroker), 0) < 0)
+    {
         printf("Reception failed\n");
         exit(EXIT_FAILURE);
     }
 
-    printf("[%ld.%ld] Registrado correctamente con ID: %d para topic %s\n",expectedTime.tv_sec,expectedTime.tv_nsec,resFromBroker.id,msgToBroker.topic );
+    printf("[%ld.%ld] Registrado correctamente con ID: %d para topic %s\n", expectedTime.tv_sec, expectedTime.tv_nsec, resFromBroker.id, msgToBroker.topic);
     return resFromBroker.id;
 }
 
-//REGISTRO COMO PUBLICAOR
-int sendPublisherRegistration(char* topic){
+// REGISTRO COMO PUBLICAOR
+int sendPublisherRegistration(char *topic)
+{
     msgToBroker.action = REGISTER_PUBLISHER;
     return sendRegistration(topic);
 }
-//REGISTRO COMO SUSCRIPTOR
-int sendSubscriberRegistration(char* topic){
+// REGISTRO COMO SUSCRIPTOR
+int sendSubscriberRegistration(char *topic)
+{
     msgToBroker.action = REGISTER_SUBSCRIBER;
     return sendRegistration(topic);
 }
-//PUBLICAMOS
-void sendPublication(char* msg){
+// PUBLICAMOS
+void sendPublication(char *msg)
+{
     strcpy(msgToBroker.data.data, msg);
     msgToBroker.action = PUBLISH_DATA;
     trySendingMessage();
 }
 
-void unregister(int isPublisher){
-    if(isPublisher) {
+void unregister(int isPublisher)
+{
+    if (isPublisher)
+    {
         msgToBroker.action = UNREGISTER_PUBLISHER;
-    } else {
+    }
+    else
+    {
         msgToBroker.action = UNREGISTER_SUBSCRIBER;
     }
 
     trySendingMessage();
-    printf("[%ld.%ld] De-Registrado correctamente del broker.\n",expectedTime.tv_sec,expectedTime.tv_nsec);
-    //falta id
+    printf("[%ld.%ld] De-Registrado correctamente del broker.\n", expectedTime.tv_sec, expectedTime.tv_nsec);
+    // falta id
 }
 
-void listenForPublications() {
+struct timespec diff(struct timespec a, struct timespec b)
+{
+    struct timespec result;
+    result.tv_sec = a.tv_sec - b.tv_sec;
+    result.tv_nsec = a.tv_nsec - b.tv_nsec;
+    if (result.tv_nsec < 0)
+    {
+        --result.tv_sec;
+        result.tv_nsec += 1000000000;
+    }
+    return result;
+}
+
+void listenForPublications()
+{
     clock_gettime(CLOCK_REALTIME, &expectedTime);
     double pub_t = expectedTime.tv_nsec;
 
-    if (recv(fd_socket, &incomingPublication, sizeof(incomingPublication), 0) < 0) {
+    if (recv(fd_socket, &incomingPublication, sizeof(incomingPublication), 0) < 0)
+    {
         printf("Reception in sub failed\n");
         exit(EXIT_FAILURE);
-    } else if(incomingPublication.action == UNREGISTER_SUBSCRIBER) {
+    }
+    else if (incomingPublication.action == UNREGISTER_SUBSCRIBER)
+    {
         unregister(0);
         exit(EXIT_FAILURE);
-    } else {
-
+    }
+    else
+    {
+        struct timespec now;
+        clock_gettime(CLOCK_REALTIME, &now);
+        struct timespec delta = diff(now, incomingPublication.data.time_generated_data);
         printf("RECIBIDO [%ld.%ld]\n", expectedTime.tv_sec, expectedTime.tv_nsec);
     }
-    //FALTA: Generó: $time_generated_data - Recibido: $time_received_data - Latencia: $latency
+    // FALTA: Generó: $time_generated_data - Recibido: $time_received_data - Latencia: $latency
 }
 
-void clientsClosing() {
+void clientsClosing()
+{
     close(fd_socket);
 }
