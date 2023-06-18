@@ -12,8 +12,6 @@
 #include <getopt.h> //para getopt_long
 #include <time.h>
 
-#define MAX_MESSAGES 150
-
 #include "proxy/proxyPubSub.h"
 
 int terminated = 0;
@@ -87,7 +85,7 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    for (int i = 0; i < MAX_MESSAGES; i++) {
+    while(!terminated) {
         sleep_ms(200);
         sendPublication(topic);
     }
