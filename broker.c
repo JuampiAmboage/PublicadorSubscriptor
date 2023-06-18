@@ -40,6 +40,10 @@ void parse_args(int argc, char *argv[], int *port, char **mode)
             if (optarg != NULL)
             {
                 *mode = optarg;
+            } else if (optind < argc && argv[optind][0] != '-')
+            {
+                *mode = argv[optind];
+                optind++;
             }
             break;
         default:
@@ -62,6 +66,7 @@ int main(int argc, char *argv[])
     char *mode_arg;
 
     parse_args(argc, argv, &port, &mode_arg);
+
     int mode = SEQUENTIAL;
     if (mode_arg)
     {
