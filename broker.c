@@ -76,7 +76,6 @@ int main(int argc, char *argv[])
         }
         else if (strcmp(mode_arg, "fair") == 0)
         {
-            printf("FAIR\n");
             mode = FAIR;
         }
     }

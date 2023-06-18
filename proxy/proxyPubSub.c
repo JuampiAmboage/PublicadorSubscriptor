@@ -216,7 +216,8 @@ void listenForPublications()
         struct timespec now;
         clock_gettime(CLOCK_REALTIME, &now);
         struct timespec delta = diff(now, incomingPublication.data.time_generated_data);
-        printf("RECIBIDO [%ld.%ld]\n", delta.tv_sec, delta.tv_nsec);
+        printf("[%ld.%ld] Recibido mensaje topic: %s - mensaje: %s\n",
+               expectedTime.tv_sec, expectedTime.tv_nsec, incomingPublication.topic, incomingPublication.data.data);
     }
     // FALTA: Generó: $time_generated_data - Recibido: $time_received_data - Latencia: $latency
 }
