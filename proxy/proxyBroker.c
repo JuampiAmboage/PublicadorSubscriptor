@@ -207,7 +207,7 @@ void print_client_update(char *topic, int id, topic_t topics[10], int *topic_cou
     }
 }
 
-void unregister_publisher(char topic[100], topic_t *topics, int *topic_count, pthread_mutex_t *topic_mutex)
+void unregister_publisher(char topic[100], topic_t *topics, int *topic_count, pthread_mutex_t *topic_mutex, int id)
 {
     pthread_mutex_lock(topic_mutex);
     for (int i = 0; i < *topic_count; i++)
@@ -231,10 +231,9 @@ void unregister_publisher(char topic[100], topic_t *topics, int *topic_count, pt
 
                 (*topic_count)--;
             }
-            print_client_update(topic, topics[i].pub_count + 2, topics, topic_count, "Publicador", "Desconectado");
-            return;
         }
     }
+    print_client_update(topic, id, topics, topic_count, "Publicador", "Desconectado");
     pthread_mutex_unlock(topic_mutex);
 }
 
@@ -367,7 +366,7 @@ void *publisher(void *arg)
             publisher_mode(pub, message);
     } while (message.action != UNREGISTER_PUBLISHER);
 
-    unregister_publisher(pub->topic_name, pub->topics, pub->topic_count, pub->topic_mutex);
+    unregister_publisher(pub->topic_name, pub->topics, pub->topic_count, pub->topic_mutex, message.id);
 
     close(pub->socket);
     free(pub);
@@ -409,7 +408,7 @@ int add_subscriber(char topic[100], topic_t topics[10], int *topic_count, int so
     }
 }
 
-void unregister_subscriber(char topic[100], topic_t *topics, int *topic_count, pthread_mutex_t *topic_mutex, int socket)
+void unregister_subscriber(char topic[100], topic_t *topics, int *topic_count, pthread_mutex_t *topic_mutex, int socket, int id)
 {
     pthread_mutex_lock(topic_mutex);
     for (int i = 0; i < *topic_count; i++)
@@ -425,7 +424,7 @@ void unregister_subscriber(char topic[100], topic_t *topics, int *topic_count, p
                         topics[i].subs[k] = topics[i].subs[k + 1];
                     }
                     topics[i].sub_count--;
-                    print_client_update(topic, j + 1, topics, topic_count, "Subscriptor", "Eliminado");
+                    print_client_update(topic, id, topics, topic_count, "Subscriptor", "Eliminado");
                     break;
                 }
             }
@@ -445,7 +444,7 @@ void *subscriber(void *arg)
         message = receive_message(sub->socket);
     } while (message.action != UNREGISTER_SUBSCRIBER);
 
-    unregister_subscriber(sub->topic_name, sub->topics, sub->topic_count, sub->topic_mutex, sub->socket);
+    unregister_subscriber(sub->topic_name, sub->topics, sub->topic_count, sub->topic_mutex, sub->socket, message.id);
 
     close(sub->socket);
     free(sub);
