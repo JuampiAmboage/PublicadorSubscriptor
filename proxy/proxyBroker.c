@@ -250,11 +250,14 @@ typedef struct
 {
     int socket;
     message_t msg;
+    pthread_barrier_t *barrier;
 } thread_send_message_args_t;
 
 void *thread_send_message(void *arg)
 {
     thread_send_message_args_t *args = (thread_send_message_args_t *)arg;
+    if (args->barrier)
+        pthread_barrier_wait(args->barrier);
     send_all(args->socket, &args->msg, sizeof(message_t));
     free(args);
     return NULL;
@@ -278,10 +281,48 @@ void publish_data_parallel(publisher_t *pub, message_t msg)
                 thread_send_message_args_t *args = malloc(sizeof(thread_send_message_args_t));
                 args->socket = pub->topics[i].subs[j];
                 args->msg = send;
+                args->barrier = NULL;
                 if (pthread_create(&thread, NULL, thread_send_message, args))
                     error("pthread_create");
                 pthread_detach(thread);
             }
+            break;
+        }
+    }
+    pthread_mutex_unlock(pub->topic_mutex);
+}
+
+void publish_data_fair(publisher_t *pub, message_t msg)
+{
+    pthread_t threads[900];
+    pthread_barrier_t barrier;
+
+    pthread_mutex_lock(pub->topic_mutex);
+    for (int i = 0; i < *pub->topic_count; i++)
+    {
+        if (strcmp(pub->topic_name, pub->topics[i].name) == 0)
+        {
+            pthread_barrier_init(&barrier, NULL, pub->topics[i].sub_count);
+
+            for (int j = 0; j < pub->topics[i].sub_count; j++)
+            {
+                message_t send;
+                send.action = PUBLISH_DATA;
+                strcpy(send.topic, msg.topic);
+                send.data = msg.data;
+                send.id = msg.id;
+                thread_send_message_args_t *args = malloc(sizeof(thread_send_message_args_t));
+                args->socket = pub->topics[i].subs[j];
+                args->msg = send;
+                args->barrier = &barrier;
+                if (pthread_create(&threads[j], NULL, thread_send_message, args))
+                    error("pthread_create");
+            }
+            for (int j = 0; j < pub->topics[i].sub_count; j++)
+            {
+                pthread_join(threads[j], NULL);
+            }
+            pthread_barrier_destroy(&barrier);
             break;
         }
     }
@@ -297,6 +338,10 @@ void *publisher(void *arg)
     if (pub->mode == PARALLEL)
     {
         publisher_mode = &publish_data_parallel;
+    }
+    else if (pub->mode == FAIR)
+    {
+        publisher_mode = &publish_data_fair;
     }
 
     message_t message;
