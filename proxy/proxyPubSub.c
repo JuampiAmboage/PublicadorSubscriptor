@@ -96,6 +96,7 @@ void trySendingMessage()
     clock_gettime(CLOCK_REALTIME, &expectedTime);
     double pub_t = expectedTime.tv_nsec;
 
+    msgToBroker.data.time_generated_data = expectedTime;
     if (send(fd_socket, &msgToBroker, sizeof(msgToBroker), 0) < 0)
     {
         printf("Send failed\n");
