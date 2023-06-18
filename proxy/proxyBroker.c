@@ -360,6 +360,19 @@ void *publisher(void *arg)
     return NULL;
 }
 
+void print_new_client(char *topic, int id, topic_t topics[10], int *topic_count, char *client_type)
+{
+    struct timespec now;
+    clock_gettime(CLOCK_REALTIME, &now);
+
+    printf("[%ld.%09ld] Nuevo cliente (%i) %s conectado: %s\n", now.tv_sec, now.tv_nsec, id, client_type, topic);
+    printf("Resumen:\n");
+    for (int i = 0; i < *topic_count; i++)
+    {
+        printf("%s: %i Subscriptores - %i Publicadores\n", topics[i].name, topics[i].sub_count, topics[i].pub_count);
+    }
+}
+
 void launch_publisher(message_t msg, topic_t topics[10], int *topic_count, int socket, pthread_mutex_t *topic_mutex, int mode)
 {
     publisher_t *arg = malloc(sizeof(publisher_t));
@@ -373,24 +386,26 @@ void launch_publisher(message_t msg, topic_t topics[10], int *topic_count, int s
     if (pthread_create(&thread, NULL, publisher, arg))
         error("pthread_create");
 
+    pthread_mutex_lock(topic_mutex);
     int id = add_publisher(msg.topic, topics, topic_count);
     respond_ok(socket, id);
+    print_new_client(msg.topic, id, topics, topic_count, "Publicador");
+    pthread_mutex_unlock(topic_mutex);
 
     pthread_detach(thread);
 }
 
-void add_subscriber(char topic[100], topic_t topics[10], int *topic_count, int socket, pthread_mutex_t *topic_mutex)
+int add_subscriber(char topic[100], topic_t topics[10], int *topic_count, int socket)
 {
-    pthread_mutex_lock(topic_mutex);
     for (int i = 0; i < *topic_count; i++)
     {
         if (strcmp(topic, topics[i].name) == 0)
         {
             topics[i].subs[topics[i].sub_count++] = socket;
             respond_ok(socket, topics[i].sub_count);
+            return topics[i].sub_count;
         }
     }
-    pthread_mutex_unlock(topic_mutex);
 }
 
 void unregister_subscriber(char topic[100], topic_t *topics, int *topic_count, pthread_mutex_t *topic_mutex, int socket)
@@ -447,7 +462,10 @@ void launch_subscriber(message_t msg, topic_t topics[10], int *topic_count, int 
     if (pthread_create(&thread, NULL, subscriber, arg))
         error("pthread_create");
 
-    add_subscriber(msg.topic, topics, topic_count, socket, topic_mutex);
+    pthread_mutex_lock(topic_mutex);
+    int id = add_subscriber(msg.topic, topics, topic_count, socket);
+    print_new_client(msg.topic, id, topics, topic_count, "Publicador");
+    pthread_mutex_unlock(topic_mutex);
 
     pthread_detach(thread);
 }
