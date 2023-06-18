@@ -244,6 +244,9 @@ void publish_data_sequential(publisher_t *pub, message_t msg)
     {
         if (strcmp(pub->topic_name, pub->topics[i].name) == 0)
         {
+            struct timespec now;
+            clock_gettime(CLOCK_REALTIME, &now);
+            printf("[%ld.%09ld] Enviando mensaje en topic %s a %i suscriptores\n", now.tv_sec, now.tv_nsec, msg.topic, pub->topics[i].sub_count);
             for (int j = 0; j < pub->topics[i].sub_count; j++)
             {
                 message_t send;
@@ -361,7 +364,15 @@ void *publisher(void *arg)
     do
     {
         message = receive_message(pub->socket);
-        printf("Mensaje: %s\n", message.data.data);
+        struct timespec now;
+        clock_gettime(CLOCK_REALTIME, &now);
+        printf("[%ld.%09ld] Recibido mensaje para publicar en topic: %s - mensaje: %s - Genero: %ld.%09ld\n",
+               now.tv_sec,
+               now.tv_nsec,
+               message.data.data,
+               message.data.time_generated_data.tv_sec,
+               message.data.time_generated_data.tv_nsec);
+
         if (message.action == PUBLISH_DATA)
             publisher_mode(pub, message);
     } while (message.action != UNREGISTER_PUBLISHER);
