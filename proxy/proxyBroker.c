@@ -369,6 +369,7 @@ void *publisher(void *arg)
         printf("[%ld.%09ld] Recibido mensaje para publicar en topic: %s - mensaje: %s - Genero: %ld.%09ld\n",
                now.tv_sec,
                now.tv_nsec,
+               message.topic,
                message.data.data,
                message.data.time_generated_data.tv_sec,
                message.data.time_generated_data.tv_nsec);

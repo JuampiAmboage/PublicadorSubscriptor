@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <getopt.h>
+#include <string.h>
 
 #include "proxy/proxyBroker.h"
 

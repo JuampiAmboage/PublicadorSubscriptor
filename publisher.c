@@ -10,6 +10,9 @@
 #include <unistd.h>
 #include <signal.h>
 #include <getopt.h> //para getopt_long
+#include <time.h>
+
+#define MAX_MESSAGES 150
 
 #include "proxy/proxyPubSub.h"
 
@@ -21,6 +24,14 @@ void sigintHandler(int sig_num){
     signal(SIGINT, sigintHandler);
     terminated = 1;
     fflush(stdout);
+}
+
+void sleep_ms(unsigned int milliseconds) {
+    struct timespec ts;
+    ts.tv_sec = milliseconds / 1000;
+    ts.tv_nsec = (milliseconds % 1000) * 1000000;
+
+    nanosleep(&ts, NULL);
 }
 
 int main(int argc, char *argv[]) {
@@ -71,13 +82,13 @@ int main(int argc, char *argv[]) {
 
     connectPublisher(server);
 
-    if(sendPublisherRegistration(topic) < 0){
+    if(sendPublisherRegistration(topic) < 0) {
         printf("No hay mas lugar para publicadores\n");
         exit(EXIT_FAILURE);
     }
 
-    while(!terminated) {
-        sleep(3);
+    for (int i = 0; i < MAX_MESSAGES; i++) {
+        sleep_ms(200);
         sendPublication(topic);
     }
 
