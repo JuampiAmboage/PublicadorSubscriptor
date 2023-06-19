@@ -24,14 +24,6 @@ void sigintHandler(int sig_num){
     fflush(stdout);
 }
 
-void sleep_ms(unsigned int milliseconds) {
-    struct timespec ts;
-    ts.tv_sec = milliseconds / 1000;
-    ts.tv_nsec = (milliseconds % 1000) * 1000000;
-
-    nanosleep(&ts, NULL);
-}
-
 int main(int argc, char *argv[]) {
     signal(SIGINT, sigintHandler);
     setbuf(stdout, NULL);
@@ -86,7 +78,7 @@ int main(int argc, char *argv[]) {
     }
 
     while(!terminated) {
-        sleep_ms(1000);
+        sleep(1)
         sendPublication(topic);
     }
 
