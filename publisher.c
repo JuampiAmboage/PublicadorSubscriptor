@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
     }
 
     while(!terminated) {
-        sleep_ms(200);
+        sleep_ms(1000);
         sendPublication(topic);
     }
 
